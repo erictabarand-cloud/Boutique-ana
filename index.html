@@ -64,7 +64,7 @@
 </div>
 <div id="palette"><h4>Bibliothèque</h4><div class="find"><input id="palFind" placeholder="Rechercher…"></div><div class="scroll" id="palScroll"></div></div>
 <div id="colors"><span class="lab">Coloris</span><div id="swatches" style="display:flex;gap:8px"></div></div>
-<div id="otb"><button id="otRotL">↺</button><button id="otRotR">↻</button><button id="otUp">▲</button><button id="otDown">▼</button><button id="otShelfMinus" class="hidden">−▦</button><button id="otShelfPlus" class="hidden">+▦</button><button id="otDup">⧉</button><button class="del" id="otDel">🗑</button></div>
+<div id="otb"><button id="otRotL">↺</button><button id="otRotR">↻</button><button id="otUp">▲</button><button id="otDown">▼</button><button id="otShelfMinus" class="hidden">−▦</button><button id="otShelfPlus" class="hidden">+▦</button><button id="otFill" class="hidden" title="Remplir le présentoir">▦+</button><button id="otRow" class="hidden" title="Dupliquer une rangée">⧉⧉</button><button id="otDup">⧉</button><button class="del" id="otDel">🗑</button></div>
 <div id="hint">Cliquez un présentoir → il se met en avant → cliquez un emplacement vert pour choisir un produit</div>
 <div class="crosshair vis-only" id="cross"></div>
 <div class="vhint vis-only"><div><kbd>ZQSD</kbd> bouger · <kbd>Souris</kbd> regarder</div><div>Entrez par la porte · <kbd>Clic</kbd> inspecter</div></div>
@@ -362,7 +362,7 @@ const CATS=['Présentoirs','Image & Son','Informatique & Tablettes','Téléphoni
 const colorsOf=t=>(T[t].col&&C[T[t].col])?C[T[t].col]:null;
 
 /* ===== ÉTAT ===== */
-let mode='edit',armed=null,armedColor=null,selected=null,snapOn=true,showTags=true,colorCtx=null,menuOpen=false,pendingSlot=null,pendingType=null,pendingColor=null;
+let mode='edit',armed=null,armedColor=null,selected=null,snapOn=true,showTags=true,colorCtx=null,menuOpen=false,pendingSlot=null,pendingType=null,pendingColor=null,fillMode=false;
 const objects=[],pick=[],obst=[],priceTags=[];
 const ghostMat=new THREE.MeshBasicMaterial({color:0x33dd66,transparent:true,opacity:.42,depthWrite:false});let ghost=null;
 const box=new THREE.BoxHelper(floor,new THREE.Color(RED));box.visible=false;scene.add(box);
@@ -379,7 +379,7 @@ function removeObject(o){if(o.parent){delete o.parent.occ[o.slotIndex];o.parent.
 function clearAll(){for(const o of[...objects])if(!o.parent)scene.remove(o.node);objects.length=0;priceTags.length=0;rebuildPick();deselect();save();}
 function refreshSlots(){slotG.clear();if(mode!=='edit'||!selected||!selected.slots)return;const d=selected;d.node.updateMatrixWorld();for(let i=0;i<d.slots.length;i++){if(d.occ[i])continue;const s=d.slots[i];const w=new THREE.Vector3(s.x,s.y+.02,s.z);d.node.localToWorld(w);const pad=new THREE.Mesh(padGeo,padMat);pad.rotation.x=-Math.PI/2;pad.position.copy(w);pad.userData={disp:d,i};slotG.add(pad);}}
 function slotAt(nx,ny){if(!slotG.children.length)return null;ray.setFromCamera({x:nx,y:ny},camera);const h=ray.intersectObjects(slotG.children,false);return h.length?h[0].object.userData:null;}
-function select(o){selected=o;if(mode==='edit'){box.setFromObject(o.node);box.visible=true;$('otb').classList.add('show');const sh=o.slots&&o.shelves!=null;$('otShelfMinus').classList.toggle('hidden',!sh);$('otShelfPlus').classList.toggle('hidden',!sh);refreshSlots();if(o.slots)focusOn(o);const cols=colorsOf(o.type);if(cols&&!o.slots){colorCtx='sel';showColors(cols,o.color);}else hideColors();}else{if(o.anims.length)o.open=true;showCard(o);}}
+function select(o){selected=o;if(mode==='edit'){box.setFromObject(o.node);box.visible=true;$('otb').classList.add('show');const sh=o.slots&&o.shelves!=null;$('otShelfMinus').classList.toggle('hidden',!sh);$('otShelfPlus').classList.toggle('hidden',!sh);$('otFill').classList.toggle('hidden',!o.slots);$('otRow').classList.toggle('hidden',!!o.parent);refreshSlots();if(o.slots)focusOn(o);const cols=colorsOf(o.type);if(cols&&!o.slots){colorCtx='sel';showColors(cols,o.color);}else hideColors();}else{if(o.anims.length)o.open=true;showCard(o);}}
 function deselect(){selected=null;box.visible=false;$('otb').classList.remove('show');slotG.clear();if(colorCtx==='sel')hideColors();}
 function setGhost(type){clearGhost();if(!type||T[type].kind==='shelf')return;const r=build(type,armedColor);r.g.traverse(m=>{if(m.isMesh)m.material=ghostMat;});ghost={node:r.g};scene.add(r.g);}
 function clearGhost(){if(ghost){scene.remove(ghost.node);ghost=null;}}
@@ -417,6 +417,11 @@ $('otUp').onclick=()=>{if(!selected||selected.parent)return;selected.h=clamp(sel
 $('otDown').onclick=()=>{if(!selected||selected.parent)return;selected.h=clamp(selected.h-.1,0,3);selected.node.position.y=selected.h;box.update();refreshSlots();save();};
 $('otDup').onclick=()=>{if(!selected||selected.parent)return;select(addFloor(selected.type,selected.x+.8,selected.z+.8,selected.ry,selected.h,selected.color));};
 $('otDel').onclick=()=>{if(selected)removeObject(selected);};
+$('otFill').onclick=()=>{if(selected&&selected.slots){let i=selected.slots.findIndex((s,k)=>!selected.occ[k]);if(i<0)i=0;openSlotMenu(selected,i,true);}};
+$('otRow').onclick=()=>duplicateRow(selected);
+function duplicateRow(o){if(!o||o.parent)return;let n=parseInt(prompt('Combien d\'exemplaires au total dans la rangée ?','4'),10);if(!n||n<2)return;n=clamp(n,2,12);const rx=Math.cos(o.ry),rz=-Math.sin(o.ry),step=(o.foot.w||1)+.3;const kids=Object.keys(o.occ).map(k=>({i:+k,type:o.occ[k].type,color:o.occ[k].color}));const base=o;
+  for(let k=1;k<n;k++){const c=addFloor(base.type,base.x+rx*step*k,base.z+rz*step*k,base.ry,base.h,base.color);if(base.shelves!=null){while(c.shelves<base.shelves){selected=c;changeShelves(1);}while(c.shelves>base.shelves){selected=c;changeShelves(-1);}}for(const kd of kids)if(c.slots&&c.slots[kd.i])addToSlot(kd.type,c,kd.i,kd.color);}
+  selected=base;select(base);save();}
 $('otShelfMinus').onclick=()=>changeShelves(-1);$('otShelfPlus').onclick=()=>changeShelves(1);
 function changeShelves(d){if(!selected||selected.shelves==null)return;const o=selected,n=clamp(o.shelves+d,1,5);if(n===o.shelves)return;const r=build(o.type,o.color,n);const ns=r.slots.length;const keep=[];for(const k in o.occ){const idx=+k,ch=o.occ[k];if(idx<ns)keep.push({idx,type:ch.type,color:ch.color});removeObject(ch);}scene.remove(o.node);o.node=r.g;o.slots=r.slots;o.shelves=n;o.foot=r.foot;o.node.position.set(o.x,o.h,o.z);o.node.rotation.y=o.ry;scene.add(o.node);o.node.traverse(m=>{if(m.isMesh)m.userData.obj=o;});o.occ={};for(const kp of keep)addToSlot(kp.type,o,kp.idx,kp.color);rebuildPick();box.setFromObject(o.node);refreshSlots();save();}
 
@@ -434,12 +439,12 @@ buildPalette();$('palFind').oninput=e=>buildPalette(e.target.value);
 
 /* MENU PRODUIT */
 const smList=$('smList'),smColors=$('smColors');
-function openSlotMenu(disp,i){pendingSlot={disp,i};pendingType=null;pendingColor=null;const acc=disp.slots[i].acc||CONS;const list=Object.keys(T).filter(k=>T[k].kind==='shelf'&&acc.includes(T[k].sc));
+function openSlotMenu(disp,i,fill){pendingSlot={disp,i};pendingType=null;pendingColor=null;fillMode=!!fill;let acc;if(fill){acc=[...new Set(disp.slots.flatMap(s=>s.acc||CONS))];}else acc=disp.slots[i].acc||CONS;$('slotMenu').querySelector('h3').textContent=fill?'Remplir le présentoir':'Choisir un produit';const list=Object.keys(T).filter(k=>T[k].kind==='shelf'&&acc.includes(T[k].sc));
   smList.innerHTML='<div class="pgrid">'+list.map(k=>`<button class="pitem" data-k="${k}">${T[k].l}<small style="color:var(--z5)">${T[k].p||''} €</small></button>`).join('')+'</div>';
   smList.querySelectorAll('.pitem').forEach(b=>b.onclick=()=>chooseProduct(b.dataset.k,b));smColors.innerHTML='';$('smValidate').disabled=true;$('slotMenu').classList.add('open');menuOpen=true;}
 function chooseProduct(k,b){smList.querySelectorAll('.pitem.on').forEach(e=>e.classList.remove('on'));b.classList.add('on');pendingType=k;const cols=colorsOf(k);pendingColor=cols?cols[0][1]:null;smColors.innerHTML='';if(cols)cols.forEach(([n,h])=>{const s=document.createElement('div');s.className='sw'+(h===pendingColor?' on':'');s.style.background=h;s.title=n;s.onclick=()=>{pendingColor=h;[...smColors.children].forEach((c,idx)=>c.classList.toggle('on',cols[idx][1]===h));};smColors.appendChild(s);});$('smValidate').disabled=false;}
-$('smValidate').onclick=()=>{if(!pendingType||!pendingSlot)return;const d=pendingSlot.disp,i=pendingSlot.i;addToSlot(pendingType,d,i,pendingColor);closeMenu();select(d);};
-function closeMenu(){$('slotMenu').classList.remove('open');menuOpen=false;pendingSlot=null;pendingType=null;}
+$('smValidate').onclick=()=>{if(!pendingType||!pendingSlot)return;const d=pendingSlot.disp;if(fillMode){const sc=T[pendingType].sc;for(let j=0;j<d.slots.length;j++){if(!d.occ[j]&&(d.slots[j].acc||CONS).includes(sc))addToSlot(pendingType,d,j,pendingColor);}}else addToSlot(pendingType,d,pendingSlot.i,pendingColor);closeMenu();select(d);};
+function closeMenu(){$('slotMenu').classList.remove('open');menuOpen=false;pendingSlot=null;pendingType=null;fillMode=false;}
 $('smClose').onclick=closeMenu;
 
 /* FICHE VISITE */
