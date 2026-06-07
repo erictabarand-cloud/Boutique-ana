@@ -3,93 +3,129 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Showroom 3D — Gros Électroménager</title>
+<title>Magasin Boulanger 3D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Saira:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#08090a; --panel:rgba(14,15,17,.82); --line:rgba(255,255,255,.09);
+    --bg:#08090a; --panel:rgba(13,14,16,.85); --line:rgba(255,255,255,.09);
     --txt:#f4f4f5; --z3:#d4d4d8; --z4:#a1a1aa; --z5:#71717a;
-    --red:#e11d2a; --red-soft:rgba(225,29,42,.16); --inox:#b8bdc4;
+    --red:#e2001a; --red-soft:rgba(226,0,26,.16);
     --sans:'Saira',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);font-family:var(--mono);color:var(--txt);}
   canvas{display:block;}
   #app{position:fixed;inset:0;}
+  button{font-family:var(--sans);}
 
-  #start{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:radial-gradient(130% 120% at 50% 10%,#16181b 0%,#0a0b0d 55%,#050506 100%);text-align:center;padding:24px;transition:opacity .6s ease;}
+  /* ---- Démarrage ---- */
+  #start{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:radial-gradient(130% 120% at 50% 8%,#1a1c1f 0%,#0a0b0d 55%,#050506 100%);text-align:center;padding:24px;transition:opacity .6s;}
   #start.hide{opacity:0;pointer-events:none;}
-  #start .kicker{font-family:var(--mono);font-size:10px;letter-spacing:.5em;color:var(--red);text-transform:uppercase;margin-bottom:18px;}
-  #start .name{font-family:var(--sans);font-weight:700;font-size:clamp(32px,7.5vw,74px);line-height:.95;letter-spacing:-.01em;text-transform:uppercase;}
-  #start .name b{color:var(--red);font-weight:700;}
-  #start .sub{font-family:var(--mono);font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--z5);margin-top:14px;margin-bottom:38px;}
-  #enter{font-family:var(--sans);font-weight:600;font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:#fff;
-    background:var(--red);border:none;padding:16px 38px;cursor:pointer;border-radius:3px;transition:filter .2s,transform .2s;}
+  .logo{display:inline-block;background:var(--red);color:#fff;font-family:var(--sans);font-weight:800;font-size:clamp(26px,6vw,52px);
+    letter-spacing:.01em;padding:8px 22px;border-radius:8px;text-transform:lowercase;line-height:1;}
+  #start .sub{font-family:var(--mono);font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--z5);margin:22px 0 38px;}
+  #enter{font-weight:600;font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:#fff;background:var(--red);border:none;padding:16px 38px;cursor:pointer;border-radius:4px;transition:filter .2s,transform .2s;}
   #enter:hover{filter:brightness(1.12);transform:translateY(-1px);}
-  #start .hint{margin-top:30px;font-size:10px;letter-spacing:.14em;color:var(--z5);line-height:2;text-transform:uppercase;}
-  #loadbar{margin-top:22px;width:200px;height:2px;background:rgba(255,255,255,.08);overflow:hidden;border-radius:2px;}
-  #loadbar i{display:block;height:100%;width:0%;background:var(--red);transition:width .3s ease;}
+  #start .hint{margin-top:28px;font-size:10px;letter-spacing:.14em;color:var(--z5);line-height:2;text-transform:uppercase;}
+  #loadbar{margin-top:20px;width:210px;height:2px;background:rgba(255,255,255,.08);overflow:hidden;border-radius:2px;}
+  #loadbar i{display:block;height:100%;width:0;background:var(--red);transition:width .3s;}
 
-  #hud{position:fixed;inset:0;z-index:20;pointer-events:none;opacity:0;transition:opacity .6s ease .2s;}
+  /* ---- HUD ---- */
+  #hud{position:fixed;inset:0;z-index:20;pointer-events:none;opacity:0;transition:opacity .6s .2s;}
   #hud.show{opacity:1;}
-  .topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;
-    padding:18px 24px;background:linear-gradient(180deg,rgba(0,0,0,.5),transparent);}
-  .topbar .store{font-family:var(--sans);font-weight:700;font-size:20px;letter-spacing:.04em;text-transform:uppercase;}
-  .topbar .store b{color:var(--red);}
-  .topbar .store small{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.3em;color:var(--z5);margin-top:3px;font-weight:400;}
-  .quote{display:flex;align-items:center;gap:9px;font-size:11px;letter-spacing:.1em;color:var(--z3);text-transform:uppercase;
-    border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(8px);padding:9px 14px;border-radius:3px;}
-  .quote b{color:var(--red);font-weight:600;}
-  .crosshair{position:absolute;top:50%;left:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;
-    background:rgba(255,255,255,.85);box-shadow:0 0 0 2px rgba(0,0,0,.4);transition:transform .15s,background .15s;}
+  .topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:16px 22px;background:linear-gradient(180deg,rgba(0,0,0,.55),transparent);}
+  .blogo{background:var(--red);color:#fff;font-family:var(--sans);font-weight:800;font-size:18px;padding:5px 13px;border-radius:6px;text-transform:lowercase;line-height:1;}
+  .topbar .right{display:flex;gap:10px;align-items:center;}
+  .pill{pointer-events:auto;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.06em;color:var(--z3);
+    border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(8px);padding:9px 14px;border-radius:6px;transition:border-color .2s;text-transform:uppercase;}
+  .pill:hover{border-color:var(--z4);}
+  .pill b{color:#fff;background:var(--red);min-width:20px;height:20px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;}
+  .crosshair{position:absolute;top:50%;left:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 0 0 2px rgba(0,0,0,.4);transition:transform .15s,background .15s;}
   .crosshair.aim{transform:scale(2);background:var(--red);}
-  .coords{position:absolute;bottom:16px;left:24px;font-size:10px;letter-spacing:.1em;color:var(--z5);}
+  .coords{position:absolute;bottom:14px;left:22px;font-size:10px;letter-spacing:.1em;color:var(--z5);}
   .coords span{color:var(--z3);}
-  .ctrlhint{position:absolute;bottom:16px;right:24px;font-size:10px;letter-spacing:.1em;color:var(--z5);text-align:right;line-height:1.9;text-transform:uppercase;}
+  .ctrlhint{position:absolute;bottom:14px;right:22px;font-size:10px;letter-spacing:.1em;color:var(--z5);text-align:right;line-height:1.9;text-transform:uppercase;}
   .ctrlhint kbd{font-family:var(--mono);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:3px;padding:1px 6px;color:var(--z3);margin:0 1px;}
+  .zone{position:absolute;top:62px;left:50%;transform:translateX(-50%);font-family:var(--sans);font-weight:600;font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:#fff;opacity:0;transition:opacity .4s;text-shadow:0 2px 12px rgba(0,0,0,.6);}
+  .zone.show{opacity:.9;}
 
-  #card{position:fixed;top:0;right:0;height:100%;width:380px;max-width:88vw;z-index:30;background:var(--panel);backdrop-filter:blur(20px);
+  /* ---- Panneaux latéraux ---- */
+  .panel{position:fixed;top:0;right:0;height:100%;width:390px;max-width:90vw;z-index:35;background:var(--panel);backdrop-filter:blur(20px);
     border-left:1px solid var(--line);transform:translateX(106%);transition:transform .42s cubic-bezier(.22,1,.36,1);pointer-events:auto;display:flex;flex-direction:column;}
-  #card.open{transform:translateX(0);}
-  #card .close{position:absolute;top:16px;right:16px;z-index:2;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.45);
-    border:1px solid var(--line);color:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
-  #card .body{padding:26px;flex:1;overflow-y:auto;}
+  .panel.open{transform:translateX(0);}
+  .panel .close{position:absolute;top:15px;right:15px;z-index:2;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.45);border:1px solid var(--line);color:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+  .panel h3{font-family:var(--sans);font-weight:700;font-size:13px;letter-spacing:.2em;text-transform:uppercase;padding:22px 24px 14px;border-bottom:1px solid var(--line);}
+
+  /* Fiche produit */
+  #card .body{padding:24px;flex:1;overflow-y:auto;}
   #card .cat{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--red);margin-bottom:8px;}
-  #card .name{font-family:var(--sans);font-weight:600;font-size:24px;line-height:1.1;margin-bottom:6px;}
-  #card .brand{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--z4);margin-bottom:18px;}
-  #card .price{font-family:var(--sans);font-weight:700;font-size:30px;margin-bottom:4px;}
-  #card .price small{font-size:13px;color:var(--z5);font-weight:400;margin-left:6px;}
-  #card .energy{display:inline-flex;align-items:center;gap:6px;margin:14px 0 20px;font-size:11px;letter-spacing:.1em;color:var(--z4);}
+  #card .name{font-family:var(--sans);font-weight:600;font-size:23px;line-height:1.12;margin-bottom:5px;}
+  #card .brand{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--z4);margin-bottom:16px;}
+  #card .price{font-family:var(--sans);font-weight:800;font-size:30px;}
+  #card .price small{font-size:13px;color:var(--z5);font-weight:400;margin-left:6px;letter-spacing:.05em;}
+  #card .energy{display:inline-flex;align-items:center;gap:6px;margin:14px 0 18px;font-size:11px;letter-spacing:.08em;color:var(--z4);}
   #card .energy b{width:24px;height:24px;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--sans);font-weight:700;}
-  #card .specs{border-top:1px solid var(--line);}
   #card .specs .row{display:flex;justify-content:space-between;font-size:11.5px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);}
   #card .specs .row span:first-child{color:var(--z5);text-transform:uppercase;letter-spacing:.1em;}
   #card .specs .row span:last-child{color:var(--z3);text-align:right;}
-  #card .actions{padding:18px 26px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px;}
-  #card .open-btn{width:100%;padding:14px;background:transparent;border:1px solid var(--line);color:var(--txt);cursor:pointer;border-radius:3px;
-    font-family:var(--sans);font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;transition:all .2s;}
-  #card .open-btn:hover{border-color:var(--inox);background:rgba(255,255,255,.04);}
-  #card .open-btn.act{border-color:var(--red);color:#fff;background:var(--red-soft);}
-  #card .open-btn[disabled]{opacity:.3;cursor:not-allowed;}
-  #card .add{width:100%;padding:14px;background:var(--red);color:#fff;border:none;cursor:pointer;border-radius:3px;
-    font-family:var(--sans);font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;transition:filter .2s;}
-  #card .add:hover{filter:brightness(1.12);}
-  #card .add.done{background:#16341f;color:#7ee29a;}
+  #card .infinity{margin-top:16px;border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-size:11px;color:var(--z4);line-height:1.6;}
+  #card .infinity b{color:#fff;font-family:var(--sans);font-weight:700;letter-spacing:.04em;}
+  .actions{padding:16px 24px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px;}
+  .btn-ghost{width:100%;padding:13px;background:transparent;border:1px solid var(--line);color:var(--txt);cursor:pointer;border-radius:5px;font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;transition:all .2s;}
+  .btn-ghost:hover{border-color:var(--z4);background:rgba(255,255,255,.04);}
+  .btn-ghost.act{border-color:var(--red);color:#fff;background:var(--red-soft);}
+  .btn-ghost[disabled]{opacity:.3;cursor:not-allowed;}
+  .btn-red{width:100%;padding:13px;background:var(--red);color:#fff;border:none;cursor:pointer;border-radius:5px;font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;transition:filter .2s;}
+  .btn-red:hover{filter:brightness(1.12);}
+  .btn-red.done{background:#16341f;color:#7ee29a;}
 
+  /* Panier */
+  #cart .body{flex:1;overflow-y:auto;padding:8px 0;}
+  .citem{display:flex;gap:12px;padding:14px 22px;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;}
+  .citem .sw{width:42px;height:42px;border-radius:5px;flex:none;}
+  .citem .info{flex:1;min-width:0;}
+  .citem .info .n{font-family:var(--sans);font-weight:600;font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .citem .info .p{font-size:11px;color:var(--z4);margin-top:3px;}
+  .qty{display:flex;align-items:center;gap:8px;}
+  .qty button{width:24px;height:24px;border-radius:5px;border:1px solid var(--line);background:transparent;color:#fff;cursor:pointer;font-size:14px;line-height:1;}
+  .qty span{font-size:13px;min-width:16px;text-align:center;}
+  .citem .rm{color:var(--z5);cursor:pointer;font-size:16px;}
+  .cart-empty{text-align:center;color:var(--z5);font-size:12px;padding:50px 20px;letter-spacing:.06em;}
+  .cart-foot{padding:18px 24px;border-top:1px solid var(--line);}
+  .cart-foot .tot{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;}
+  .cart-foot .tot span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--z5);}
+  .cart-foot .tot b{font-family:var(--sans);font-weight:800;font-size:26px;}
+  .cart-foot .tot b small{font-size:12px;color:var(--z5);font-weight:400;}
+
+  /* Paiement (modal) */
+  #pay{position:fixed;inset:0;z-index:50;background:rgba(5,6,7,.78);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:24px;}
+  #pay.open{display:flex;}
+  .paybox{width:380px;max-width:92vw;background:#0e0f11;border:1px solid var(--line);border-radius:12px;padding:28px;text-align:center;}
+  .paybox .blogo{display:inline-block;margin-bottom:18px;}
+  .paybox h4{font-family:var(--sans);font-weight:600;font-size:18px;margin-bottom:6px;}
+  .paybox .sub{font-size:11px;color:var(--z5);letter-spacing:.1em;text-transform:uppercase;margin-bottom:22px;}
+  .field{text-align:left;margin-bottom:14px;}
+  .field label{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--z5);margin-bottom:6px;}
+  .field input{width:100%;background:#16181b;border:1px solid var(--line);border-radius:6px;padding:12px;color:#fff;font-family:var(--mono);font-size:13px;}
+  .field.row2{display:flex;gap:12px;}
+  .pay-total{font-family:var(--sans);font-weight:800;font-size:30px;margin:6px 0 20px;}
+  .pay-total small{font-size:13px;color:var(--z5);font-weight:400;}
+  .spinner{width:34px;height:34px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;margin:20px auto;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .pay-ok{font-size:46px;margin:8px 0;}
+
+  /* Tactile */
   #touch{position:fixed;inset:0;z-index:18;display:none;pointer-events:none;}
   #touch.on{display:block;}
-  #joy{position:absolute;bottom:34px;left:28px;width:118px;height:118px;border-radius:50%;border:1px solid var(--line);
-    background:rgba(255,255,255,.04);pointer-events:auto;backdrop-filter:blur(4px);}
-  #joy .nub{position:absolute;top:50%;left:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(255,255,255,.16);border:1px solid var(--line);}
+  #joy{position:absolute;bottom:32px;left:26px;width:114px;height:114px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.04);pointer-events:auto;backdrop-filter:blur(4px);}
+  #joy .nub{position:absolute;top:50%;left:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(255,255,255,.16);border:1px solid var(--line);}
   #joy .lbl{position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-size:9px;letter-spacing:.2em;color:var(--z5);text-transform:uppercase;}
-  .looknote{position:absolute;bottom:50px;right:30px;font-size:9px;letter-spacing:.16em;color:var(--z5);text-transform:uppercase;text-align:right;line-height:1.8;}
+  .looknote{position:absolute;bottom:48px;right:28px;font-size:9px;letter-spacing:.14em;color:var(--z5);text-transform:uppercase;text-align:right;line-height:1.8;}
 
-  @media(max-width:640px){
-    .topbar .store{font-size:16px;}.ctrlhint{display:none;}.coords{font-size:9px;left:14px;}.topbar{padding:14px 16px;}
-  }
+  @media(max-width:640px){.topbar .blogo{font-size:15px;}.ctrlhint{display:none;}.coords{font-size:9px;left:12px;}.topbar{padding:12px 14px;}.pill{padding:8px 10px;font-size:11px;}}
 </style>
 </head>
 <body>
@@ -97,18 +133,22 @@
 
 <div id="hud">
   <div class="topbar">
-    <div class="store" id="storeName">PRO<b>ÉLECTRO</b><small id="storeTag">SHOWROOM 3D · GROS ÉLECTROMÉNAGER</small></div>
-    <div class="quote">DEVIS <b id="quoteCount">0</b></div>
+    <div class="blogo">boulanger</div>
+    <div class="right">
+      <div class="pill" id="cartBtn">Panier <b id="cartCount">0</b></div>
+    </div>
   </div>
+  <div class="zone" id="zoneLabel"></div>
   <div class="crosshair" id="cross"></div>
-  <div class="coords">POS <span id="pos">0.0 / 0.0</span> · <span id="seen">0</span>/88 vus</div>
+  <div class="coords">POS <span id="pos">0 / 0</span> · <span id="prodCount">0</span> produits</div>
   <div class="ctrlhint">
-    <div><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> / <kbd>↑↓←→</kbd> se déplacer</div>
-    <div><kbd>Souris</kbd> regarder · <kbd>Clic</kbd> inspecter / ouvrir · <kbd>Échap</kbd> sortir</div>
+    <div><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> se déplacer · <kbd>Souris</kbd> regarder</div>
+    <div><kbd>Clic</kbd> inspecter · <kbd>P</kbd> panier · <kbd>Échap</kbd> sortir</div>
   </div>
 </div>
 
-<div id="card">
+<!-- Fiche produit -->
+<div class="panel" id="card">
   <button class="close" id="cardClose">✕</button>
   <div class="body">
     <div class="cat" id="cardCat"></div>
@@ -117,22 +157,40 @@
     <div class="price" id="cardPrice"></div>
     <div class="energy" id="cardEnergy"></div>
     <div class="specs" id="cardSpecs"></div>
+    <div class="infinity"><b>infinity</b> — Réparé ou remplacé, livraison & installation. La sérénité incluse sur cet article.</div>
   </div>
   <div class="actions">
-    <button class="open-btn" id="cardOpen">Ouvrir les portes</button>
-    <button class="add" id="cardAdd">Ajouter au devis</button>
+    <button class="btn-ghost" id="cardOpen">Ouvrir / Fermer</button>
+    <button class="btn-red" id="cardAdd">Ajouter au panier</button>
   </div>
 </div>
 
-<div id="touch">
-  <div id="joy"><div class="nub" id="joyNub"></div><div class="lbl">Déplacement</div></div>
-  <div class="looknote">Glisser à droite<br>pour regarder<br>Toucher un appareil<br>pour l'inspecter</div>
+<!-- Panier -->
+<div class="panel" id="cart">
+  <button class="close" id="cartClose">✕</button>
+  <h3>Mon panier</h3>
+  <div class="body" id="cartBody"></div>
+  <div class="cart-foot">
+    <div class="tot"><span>Total TTC</span><b id="cartTotal">0 €</b></div>
+    <button class="btn-red" id="payBtn">Payer</button>
+  </div>
 </div>
 
+<!-- Paiement -->
+<div id="pay">
+  <div class="paybox" id="payBox"></div>
+</div>
+
+<!-- Tactile -->
+<div id="touch">
+  <div id="joy"><div class="nub" id="joyNub"></div><div class="lbl">Déplacement</div></div>
+  <div class="looknote">Glisser à droite<br>pour regarder<br>Toucher un produit</div>
+</div>
+
+<!-- Start -->
 <div id="start">
-  <div class="kicker">Distributeur · Gros électroménager</div>
-  <div class="name" id="startName">PRO<b>ÉLECTRO</b></div>
-  <div class="sub">Showroom 3D — 88 appareils en exposition</div>
+  <div class="logo">boulanger</div>
+  <div class="sub">Magasin 3D interactif — Télé · Son · Phone · Informatique · Électro</div>
   <button id="enter">Entrer dans le magasin →</button>
   <div class="hint" id="startHint">Chargement…</div>
   <div id="loadbar"><i></i></div>
@@ -145,498 +203,462 @@
 <script type="module">
 import * as THREE from 'three';
 
-/* ============================ CONFIG ============================ */
-const CONFIG = { storeName:"PROÉLECTRO", currency:"€" };
-
-/* ============================ RENDU ============================ */
+/* ===================== SETUP ===================== */
 const app=document.getElementById('app');
-const W=34, D=24, H=4.8, HW=W/2, HD=D/2;
-const isMobile = matchMedia('(pointer:coarse)').matches || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+const W=42,D=32,H=5.2,HW=W/2,HD=D/2;
+const RED='#e2001a';
+const isMobile=matchMedia('(pointer:coarse)').matches||/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
-const scene=new THREE.Scene();
-scene.background=new THREE.Color('#0a0b0c');
-const camera=new THREE.PerspectiveCamera(64,innerWidth/innerHeight,0.05,200);
+const scene=new THREE.Scene();scene.background=new THREE.Color('#0b0c0d');
+const camera=new THREE.PerspectiveCamera(64,innerWidth/innerHeight,0.05,300);
 const renderer=new THREE.WebGLRenderer({antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,isMobile?1.5:2));
 renderer.setSize(innerWidth,innerHeight);
-renderer.shadowMap.enabled=!isMobile;
-renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.0;
+renderer.shadowMap.enabled=!isMobile;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.02;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 app.appendChild(renderer.domElement);
 
-/* --- Environnement (reflets studio sur l'inox et le sol ciré) --- */
-(function buildEnv(){
-  const pmrem=new THREE.PMREMGenerator(renderer);
-  const s=new THREE.Scene(); s.background=new THREE.Color('#8b9097');
-  const room=new THREE.Mesh(new THREE.BoxGeometry(24,14,24),
-    new THREE.MeshStandardMaterial({side:THREE.BackSide,roughness:1,metalness:0,color:'#c4c8cd'}));
-  s.add(room);
-  const lm=new THREE.MeshStandardMaterial({color:'#000',emissive:'#ffffff',emissiveIntensity:7});
-  for(const x of [-6,-2,2,6]){const p=new THREE.Mesh(new THREE.PlaneGeometry(2.4,9),lm);p.position.set(x,6.9,0);p.rotation.x=Math.PI/2;s.add(p);}
-  scene.environment=pmrem.fromScene(s,0.04).texture;
-})();
+(function env(){const pm=new THREE.PMREMGenerator(renderer);const s=new THREE.Scene();s.background=new THREE.Color('#9398a0');
+  const room=new THREE.Mesh(new THREE.BoxGeometry(30,16,30),new THREE.MeshStandardMaterial({side:THREE.BackSide,color:'#c8ccd1',roughness:1}));s.add(room);
+  const lm=new THREE.MeshStandardMaterial({color:'#000',emissive:'#fff',emissiveIntensity:7});
+  for(const x of[-7,-2,3,8]){const p=new THREE.Mesh(new THREE.PlaneGeometry(2.6,10),lm);p.position.set(x,7.9,0);p.rotation.x=Math.PI/2;s.add(p);}
+  scene.environment=pm.fromScene(s,0.04).texture;})();
 
-/* ============================ MATÉRIAUX ============================ */
+/* ===================== MATÉRIAUX ===================== */
 const MAT={
-  inox:new THREE.MeshStandardMaterial({color:'#c4c9cf',metalness:0.95,roughness:0.34,envMapIntensity:1.15}),
-  inoxDark:new THREE.MeshStandardMaterial({color:'#8d9298',metalness:0.9,roughness:0.4,envMapIntensity:1}),
-  white:new THREE.MeshStandardMaterial({color:'#f2f3f4',metalness:0.04,roughness:0.42,envMapIntensity:0.7}),
-  whiteSoft:new THREE.MeshStandardMaterial({color:'#e9eaec',metalness:0.02,roughness:0.7}),
-  blackBody:new THREE.MeshStandardMaterial({color:'#1a1b1d',metalness:0.3,roughness:0.45,envMapIntensity:0.9}),
-  blackGlass:new THREE.MeshPhysicalMaterial({color:'#0b0c0e',metalness:0.5,roughness:0.1,clearcoat:1,clearcoatRoughness:0.08,envMapIntensity:1.2}),
-  glass:new THREE.MeshStandardMaterial({color:'#cfe3ea',transparent:true,opacity:0.22,roughness:0.06,metalness:0,envMapIntensity:1}),
-  ovenGlass:new THREE.MeshStandardMaterial({color:'#15171a',transparent:true,opacity:0.85,roughness:0.12,metalness:0.4,envMapIntensity:0.9}),
-  fridgeIn:new THREE.MeshStandardMaterial({color:'#eef1f2',metalness:0.05,roughness:0.55}),
-  ovenIn:new THREE.MeshStandardMaterial({color:'#23252a',metalness:0.2,roughness:0.5}),
-  metalIn:new THREE.MeshStandardMaterial({color:'#a9adb2',metalness:0.7,roughness:0.4,envMapIntensity:1}),
-  handle:new THREE.MeshStandardMaterial({color:'#d6dadf',metalness:0.95,roughness:0.25,envMapIntensity:1.2}),
-  knob:new THREE.MeshStandardMaterial({color:'#2a2c30',metalness:0.6,roughness:0.4}),
-  screen:new THREE.MeshStandardMaterial({color:'#05080a',emissive:'#0b6e8c',emissiveIntensity:0.6,roughness:0.2}),
-  plinth:new THREE.MeshStandardMaterial({color:'#fbfbfc',metalness:0.02,roughness:0.6}),
-  grate:new THREE.MeshStandardMaterial({color:'#1c1d1f',metalness:0.5,roughness:0.5})
+  inox:new THREE.MeshStandardMaterial({color:'#c4c9cf',metalness:.95,roughness:.34,envMapIntensity:1.15}),
+  inoxDark:new THREE.MeshStandardMaterial({color:'#8d9298',metalness:.9,roughness:.4}),
+  white:new THREE.MeshStandardMaterial({color:'#f2f3f4',metalness:.04,roughness:.42}),
+  whiteSoft:new THREE.MeshStandardMaterial({color:'#e8eaec',metalness:.02,roughness:.7}),
+  pBlack:new THREE.MeshStandardMaterial({color:'#1b1c1e',metalness:.35,roughness:.45}),
+  pDark:new THREE.MeshStandardMaterial({color:'#2a2c30',metalness:.3,roughness:.5}),
+  pSilver:new THREE.MeshStandardMaterial({color:'#b9bdc2',metalness:.75,roughness:.32}),
+  pWhite:new THREE.MeshStandardMaterial({color:'#eceef0',metalness:.05,roughness:.5}),
+  glass:new THREE.MeshStandardMaterial({color:'#cfe3ea',transparent:true,opacity:.18,roughness:.05,metalness:0,envMapIntensity:1}),
+  ovenGlass:new THREE.MeshStandardMaterial({color:'#15171a',transparent:true,opacity:.85,roughness:.12,metalness:.4}),
+  fridgeIn:new THREE.MeshStandardMaterial({color:'#eef1f2',metalness:.05,roughness:.55}),
+  ovenIn:new THREE.MeshStandardMaterial({color:'#23252a',roughness:.5,metalness:.2}),
+  metalIn:new THREE.MeshStandardMaterial({color:'#a9adb2',metalness:.7,roughness:.4}),
+  handle:new THREE.MeshStandardMaterial({color:'#d6dadf',metalness:.95,roughness:.25,envMapIntensity:1.2}),
+  knob:new THREE.MeshStandardMaterial({color:'#2a2c30',metalness:.6,roughness:.4}),
+  grate:new THREE.MeshStandardMaterial({color:'#1c1d1f',metalness:.5,roughness:.5}),
+  fabric:new THREE.MeshStandardMaterial({color:'#2a2b2d',roughness:.95}),
+  fabricGrey:new THREE.MeshStandardMaterial({color:'#7a7d82',roughness:.9}),
+  wood:new THREE.MeshStandardMaterial({color:'#6b4f33',roughness:.6}),
+  plinth:new THREE.MeshStandardMaterial({color:'#fbfbfc',roughness:.6}),
+  red:new THREE.MeshStandardMaterial({color:RED,roughness:.5,metalness:.1}),
+  screenOff:new THREE.MeshStandardMaterial({color:'#05070a',roughness:.2,metalness:.4}),
 };
 
-/* ============================ HELPERS ============================ */
-function M(geo,mat,x=0,y=0,z=0){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;return m;}
+/* ===================== HELPERS ===================== */
+function M(g,m,x=0,y=0,z=0){const me=new THREE.Mesh(g,m);me.position.set(x,y,z);me.castShadow=true;me.receiveShadow=true;return me;}
 function B(w,h,d){return new THREE.BoxGeometry(w,h,d);}
 function CY(rt,rb,h,s=20,oe=false){return new THREE.CylinderGeometry(rt,rb,h,s,1,oe);}
+const interactables=[],products=[],obstacles=[];let PID=0;
 
-const interactables=[], appliances=[], obstacles=[];
-
-/* contact-shadow texture (ombre douce sous chaque appareil) */
 const blobTex=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');
-  const g=x.createRadialGradient(64,64,4,64,64,64);g.addColorStop(0,'rgba(0,0,0,.5)');g.addColorStop(1,'rgba(0,0,0,0)');
-  x.fillStyle=g;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(c);})();
-function shadowBlob(w,d){const m=new THREE.Mesh(new THREE.PlaneGeometry(w*1.5,d*1.7),
-  new THREE.MeshBasicMaterial({map:blobTex,transparent:true,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.y=0.01;m.renderOrder=1;return m;}
-
-/* enregistre un appareil : footprint, anims portes, meta */
-function register(group,meta,anims,footprint){
-  const a={group,meta,anims:anims||[],open:false,t:0,foot:footprint};
-  group.traverse(o=>{if(o.isMesh){o.userData.appliance=a;interactables.push(o);}});
-  appliances.push(a);
-  const p=group.position;
-  obstacles.push({minX:p.x-footprint.w/2,maxX:p.x+footprint.w/2,minZ:p.z-footprint.d/2,maxZ:p.z+footprint.d/2});
-  const b=shadowBlob(footprint.w,footprint.d);b.position.set(p.x,0.01,p.z);scene.add(b);
+  const g=x.createRadialGradient(64,64,4,64,64,64);g.addColorStop(0,'rgba(0,0,0,.5)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(c);})();
+function blob(w,d){const m=new THREE.Mesh(new THREE.PlaneGeometry(w*1.4,d*1.5),new THREE.MeshBasicMaterial({map:blobTex,transparent:true,depthWrite:false}));m.rotation.x=-Math.PI/2;m.renderOrder=1;return m;}
+function obstacle(x,z,w,d){obstacles.push({minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2});}
+function reg(group,meta,anims,foot,solid){
+  meta.id=++PID;const a={group,meta,anims:anims||[],open:false,t:0,foot};
+  group.traverse(o=>{if(o.isMesh){o.userData.prod=a;interactables.push(o);}});products.push(a);
+  if(solid){obstacle(group.position.x,group.position.z,foot.w,foot.d);const b=blob(foot.w,foot.d);b.position.set(group.position.x,.012,group.position.z);scene.add(b);}
   return a;
 }
 
-/* ============================ STRUCTURE MAGASIN ============================ */
-// Sol béton ciré
-const concrete=(()=>{const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');
-  x.fillStyle='#6e7176';x.fillRect(0,0,512,512);
-  for(let i=0;i<2600;i++){x.fillStyle=`rgba(${100+Math.random()*60},${100+Math.random()*60},${105+Math.random()*55},${Math.random()*0.18})`;
-    x.fillRect(Math.random()*512,Math.random()*512,Math.random()*7,Math.random()*7);}
-  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(8,6);t.colorSpace=THREE.SRGBColorSpace;return t;})();
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(W,D),
-  new THREE.MeshPhysicalMaterial({map:concrete,color:'#777a7f',roughness:0.45,metalness:0.05,clearcoat:0.55,clearcoatRoughness:0.45,envMapIntensity:0.7}));
+/* ===================== TEXTURES / SIGNALÉTIQUE ===================== */
+function roundRect(x,c,X,Y,w,h,r){c.beginPath();c.moveTo(X+r,Y);c.arcTo(X+w,Y,X+w,Y+h,r);c.arcTo(X+w,Y+h,X,Y+h,r);c.arcTo(X,Y+h,X,Y,r);c.arcTo(X,Y,X+w,Y,r);c.closePath();}
+function signTex(text,sub,bg,fg,accent){
+  const c=document.createElement('canvas');c.width=1024;c.height=256;const x=c.getContext('2d');
+  x.fillStyle=bg;x.fillRect(0,0,1024,256);
+  if(accent){x.fillStyle=accent;x.fillRect(0,0,1024,10);x.fillRect(0,246,1024,10);}
+  x.fillStyle=fg;x.textAlign='center';x.textBaseline='middle';
+  x.font='800 110px Saira, Arial, sans-serif';x.fillText(text,512,sub?108:128);
+  if(sub){x.font='400 38px Saira, Arial';x.fillStyle=accent||fg;x.fillText(sub,512,186);}
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;}
+function hangSign(x,z,w,tex,y=3.6){const m=new THREE.Mesh(B(w,w*0.25,0.06),new THREE.MeshBasicMaterial({map:tex}));m.position.set(x,y,z);scene.add(m);
+  for(const dx of[-w*0.4,w*0.4]){const cab=M(CY(0.01,0.01,(H-y-w*0.13),6),MAT.inoxDark,x+dx,y+w*0.13+(H-y-w*0.13)/2,z);scene.add(cab);}return m;}
+
+/* ----- Film publicitaire Boulanger (texture animée des TV) ----- */
+const adCv=document.createElement('canvas');adCv.width=640;adCv.height=360;const ad=adCv.getContext('2d');
+const adTex=new THREE.CanvasTexture(adCv);adTex.colorSpace=THREE.SRGBColorSpace;
+function aLogo(cx,cy,s){ad.fillStyle=RED;roundRect(0,ad,cx-150*s,cy-42*s,300*s,84*s,16*s);ad.fill();
+  ad.fillStyle='#fff';ad.font=`800 ${56*s}px Saira, Arial`;ad.textAlign='center';ad.textBaseline='middle';ad.fillText('boulanger',cx,cy+3*s);}
+function fade(t,d){return Math.min(1,Math.min(t,d-t)/0.45);}
+const adScenes=[
+ (t)=>{ad.fillStyle=RED;ad.fillRect(0,0,640,360);ad.globalAlpha=fade(t,3.2);const s=0.7+Math.min(t,0.6)/0.6*0.3;
+   ad.fillStyle='#fff';ad.font=`800 ${64*s}px Saira,Arial`;ad.textAlign='center';ad.textBaseline='middle';ad.fillText('boulanger',320,150);
+   ad.font='400 26px Saira,Arial';ad.fillText("L'univers de la tech & de l'électro",320,210);ad.globalAlpha=1;},
+ (t)=>{ad.fillStyle='#0c0d0f';ad.fillRect(0,0,640,360);ad.globalAlpha=fade(t,3.2);
+   const cats=['TÉLÉVISION','SON','TÉLÉPHONIE','INFORMATIQUE','ÉLECTROMÉNAGER'];ad.textAlign='center';
+   cats.forEach((c,i)=>{const ap=Math.min(1,Math.max(0,(t-i*0.35)/0.35));ad.globalAlpha=fade(t,3.2)*ap;
+     ad.fillStyle=i%2?RED:'#fff';ad.font='700 34px Saira,Arial';ad.fillText(c,320,70+i*52);});ad.globalAlpha=1;},
+ (t)=>{ad.fillStyle='#f4f4f5';ad.fillRect(0,0,640,360);ad.globalAlpha=fade(t,3.6);
+   ad.fillStyle='#111';ad.textAlign='center';ad.font='700 40px Saira,Arial';ad.fillText('TV OLED 4K 65"',320,95);
+   ad.font='400 22px Saira,Arial';ad.fillStyle='#888';ad.fillText('Le cinéma à la maison',320,140);
+   const pop=Math.min(1,Math.max(0,(t-0.5)/0.4));ad.save();ad.translate(320,225);ad.scale(0.8+pop*0.2,0.8+pop*0.2);
+   ad.fillStyle=RED;roundRect(0,ad,-130,-40,260,80,14);ad.fill();ad.fillStyle='#fff';ad.font='800 50px Saira,Arial';ad.fillText('1 299 €',0,4);ad.restore();
+   ad.fillStyle='#555';ad.font='400 18px Saira,Arial';ad.fillText('Disponible en magasin · TTC',320,300);ad.globalAlpha=1;},
+ (t)=>{ad.fillStyle=RED;ad.fillRect(0,0,640,360);ad.globalAlpha=fade(t,3.4);ad.textAlign='center';ad.fillStyle='#fff';
+   ad.font='800 70px Saira,Arial';ad.fillText('infinity',320,140);
+   ad.font='400 26px Saira,Arial';ad.fillText('Réparé ou remplacé.',320,205);ad.fillText('La sérénité, incluse.',320,242);ad.globalAlpha=1;},
+ (t)=>{ad.fillStyle='#0c0d0f';ad.fillRect(0,0,640,360);ad.globalAlpha=fade(t,3.4);ad.textAlign='center';
+   ad.fillStyle='#fff';ad.font='800 72px Saira,Arial';ad.fillText('CLUB',236,150);ad.fillStyle=RED;ad.fillText('+',360,150);
+   ad.fillStyle='#bbb';ad.font='400 24px Saira,Arial';ad.fillText('Vos avantages fidélité',320,215);
+   ad.fillStyle='#fff';ad.fillText('Adhésion gratuite en caisse',320,250);ad.globalAlpha=1;},
+ (t)=>{ad.fillStyle=RED;ad.fillRect(0,0,640,360);ad.globalAlpha=fade(t,3.2);aLogo(320,150,1);
+   ad.fillStyle='#fff';ad.font='400 28px Saira,Arial';ad.textAlign='center';ad.fillText('Le plaisir de la tech.',320,235);ad.globalAlpha=1;},
+];
+const AD_DUR=[3.2,3.2,3.6,3.4,3.4,3.2];const AD_TOTAL=AD_DUR.reduce((a,b)=>a+b,0);
+function drawAd(time){let tt=time%AD_TOTAL,i=0;while(tt>AD_DUR[i]){tt-=AD_DUR[i];i++;}ad.globalAlpha=1;adScenes[i](tt);adTex.needsUpdate=true;}
+const adMat=new THREE.MeshBasicMaterial({map:adTex});
+
+/* écran téléphone & ordi (statiques) */
+function uiTex(bg,bar){const c=document.createElement('canvas');c.width=256;c.height=512;const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,512);g.addColorStop(0,bg);g.addColorStop(1,'#0b0d12');x.fillStyle=g;x.fillRect(0,0,256,512);
+  x.fillStyle=bar;for(let i=0;i<8;i++){roundRect(0,x,40+(i%2)*16,90+i*48,176,30,8);x.fill();}
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;}
+const phoneMat=new THREE.MeshBasicMaterial({map:uiTex('#15324f','rgba(255,255,255,.12)')});
+const laptopMat=new THREE.MeshBasicMaterial({map:uiTex('#1a1430','rgba(226,0,26,.5)')});
+
+/* ===================== STRUCTURE MAGASIN ===================== */
+// sol carrelage clair (magasin)
+const tile=(()=>{const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');
+  x.fillStyle='#d9dadc';x.fillRect(0,0,512,512);for(let i=0;i<2000;i++){x.fillStyle=`rgba(150,150,155,${Math.random()*0.12})`;x.fillRect(Math.random()*512,Math.random()*512,4,4);}
+  x.strokeStyle='rgba(120,120,125,.5)';x.lineWidth=3;for(let p=0;p<=512;p+=128){x.beginPath();x.moveTo(p,0);x.lineTo(p,512);x.moveTo(0,p);x.lineTo(512,p);x.stroke();}
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(12,9);t.colorSpace=THREE.SRGBColorSpace;return t;})();
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(W,D),new THREE.MeshPhysicalMaterial({map:tile,color:'#e2e3e5',roughness:.4,metalness:.04,clearcoat:.5,clearcoatRoughness:.5,envMapIntensity:.6}));
 floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
 
-// Plafond noir + dalles lumineuses
-const ceil=new THREE.Mesh(new THREE.PlaneGeometry(W,D),new THREE.MeshStandardMaterial({color:'#0c0c0d',roughness:0.95}));
-ceil.rotation.x=Math.PI/2;ceil.position.y=H;scene.add(ceil);
-const panelMat=new THREE.MeshStandardMaterial({color:'#101012',emissive:'#fbf6ec',emissiveIntensity:0.9});
-for(let gx=-12;gx<=12;gx+=6)for(let gz=-8;gz<=8;gz+=5.3){
-  const p=new THREE.Mesh(B(3.6,0.05,1.0),panelMat);p.position.set(gx,H-0.04,gz);scene.add(p);}
+// plafond + dalles LED
+const ceil=new THREE.Mesh(new THREE.PlaneGeometry(W,D),new THREE.MeshStandardMaterial({color:'#15161a',roughness:.95}));ceil.rotation.x=Math.PI/2;ceil.position.y=H;scene.add(ceil);
+const led=new THREE.MeshStandardMaterial({color:'#101012',emissive:'#fbf7ee',emissiveIntensity:.95});
+for(let gx=-16;gx<=16;gx+=4)for(let gz=-13;gz<=13;gz+=4.2){const p=new THREE.Mesh(B(3,0.05,0.5),led);p.position.set(gx,H-.04,gz);scene.add(p);}
 
-// Murs
-const wallMat=new THREE.MeshStandardMaterial({color:'#3a3c40',roughness:0.9});
-function wall(w,x,z,ry){const m=new THREE.Mesh(B(w,H,0.2),wallMat);m.position.set(x,H/2,z);m.rotation.y=ry;m.receiveShadow=true;scene.add(m);}
+// murs
+const wallMat=new THREE.MeshStandardMaterial({color:'#33353a',roughness:.92});
+function wall(w,x,z,ry,mat){const m=new THREE.Mesh(B(w,H,0.25),mat||wallMat);m.position.set(x,H/2,z);m.rotation.y=ry;m.receiveShadow=true;scene.add(m);}
 wall(W,0,-HD,0); wall(D,-HW,0,Math.PI/2); wall(D,HW,0,Math.PI/2);
-wall(8,-HW+4,HD,0); wall(8,HW-4,HD,0); wall(W,0,HD-0.001,0,0); // façade (haut)
-const facade=new THREE.Mesh(B(W,1.2,0.2),wallMat);facade.position.set(0,H-0.6,HD);scene.add(facade);
+// façade : pignons + vitrines + bandeau, ouverture porte centrale (x:-2..2)
+wall(13,-HW+6.5,HD,0); wall(13,HW-6.5,HD,0);
+const facadeTop=new THREE.Mesh(B(W,1.1,0.25),wallMat);facadeTop.position.set(0,H-.55,HD);scene.add(facadeTop);
+// vitrines latérales
+for(const sx of[-7,7]){const gpane=new THREE.Mesh(B(8,H-1.1,0.05),MAT.glass);gpane.position.set(sx,(H-1.1)/2,HD-0.02);scene.add(gpane);
+  for(let i=-1;i<=1;i++){const mull=M(B(0.08,H-1.1,0.08),MAT.inoxDark,sx+i*2.6,(H-1.1)/2,HD-0.02);scene.add(mull);}}
+// enseigne intérieure
+const ens=new THREE.Mesh(B(7,1.4,0.1),adMat===null?MAT.red:new THREE.MeshBasicMaterial({map:signTex('boulanger',null,RED,'#fff')}));
+ens.position.set(0,H-.55,HD-0.14);scene.add(ens);
+// extérieur (lumière du jour)
+const out=new THREE.Mesh(new THREE.PlaneGeometry(60,30),new THREE.MeshBasicMaterial({color:'#aeb8c4'}));out.position.set(0,8,HD+12);scene.add(out);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(60,30),new THREE.MeshStandardMaterial({color:'#4a4d52',roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.set(0,0.005,HD+12);scene.add(ground);
 
-// Éclairage
-scene.add(new THREE.HemisphereLight('#eef2f6','#3a3c40',0.7));
-scene.add(new THREE.AmbientLight('#ffffff',0.35));
-const key=new THREE.DirectionalLight('#fff6ea',0.85);key.position.set(6,12,8);
-if(!isMobile){key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.camera.near=1;key.shadow.camera.far=50;
-  key.shadow.camera.left=-20;key.shadow.camera.right=20;key.shadow.camera.top=16;key.shadow.camera.bottom=-16;key.shadow.bias=-0.0004;}
+// portes automatiques (2 vantaux verre)
+const doorFrameMat=MAT.inoxDark;
+scene.add(M(B(0.12,H-1.1,0.12),doorFrameMat,-2,(H-1.1)/2,HD));
+scene.add(M(B(0.12,H-1.1,0.12),doorFrameMat,2,(H-1.1)/2,HD));
+const dPanels=[];
+for(const side of[-1,1]){const p=new THREE.Group();p.position.set(0,0,HD-0.05);scene.add(p);
+  const pane=M(B(1.9,H-1.3,0.06),MAT.glass,side*0.97,(H-1.3)/2,0);p.add(pane);
+  p.add(M(B(1.9,0.1,0.08),doorFrameMat,side*0.97,0.05,0));p.add(M(B(1.9,0.1,0.08),doorFrameMat,side*0.97,H-1.25,0));
+  dPanels.push({g:p,side});}
+// tapis + signalétique entrée
+scene.add(M(B(4,0.02,2.2),MAT.fabric,0,0.011,HD-1.6));
+const entrySign=new THREE.Mesh(B(2.2,0.5,0.05),new THREE.MeshBasicMaterial({map:signTex('ENTRÉE',null,RED,'#fff')}));entrySign.position.set(0,H-1.4,HD-0.2);scene.add(entrySign);
+
+// éclairage
+scene.add(new THREE.HemisphereLight('#eef2f6','#3a3c40',.75));
+scene.add(new THREE.AmbientLight('#fff',.4));
+const key=new THREE.DirectionalLight('#fff6ea',.8);key.position.set(8,14,12);
+if(!isMobile){key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.camera.near=1;key.shadow.camera.far=60;key.shadow.camera.left=-24;key.shadow.camera.right=24;key.shadow.camera.top=20;key.shadow.camera.bottom=-20;key.shadow.bias=-.0004;}
 scene.add(key);
-const fill=new THREE.DirectionalLight('#e8eef5',0.4);fill.position.set(-8,9,-6);scene.add(fill);
+const fill=new THREE.DirectionalLight('#e8eef5',.45);fill.position.set(-10,11,-8);scene.add(fill);
 
-/* ============================ DATA / CATALOGUE ============================ */
-let seed=20260607; const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};
-const pick=a=>a[Math.floor(rnd()*a.length)];
-const rint=(a,b)=>Math.floor(a+rnd()*(b-a+1));
-const cls=()=>pick(['A','A','B','B','C','C','D','E']);
+/* ===================== FIXTURES ===================== */
+function podium(x,z,w=1.2,d=0.8,h=0.85,mat=MAT.plinth){const g=new THREE.Group();g.position.set(x,0,z);
+  g.add(M(B(w*0.85,h,d*0.85),mat,0,h/2,0));g.add(M(B(w,0.05,d),MAT.whiteSoft,0,h+0.02,0));scene.add(g);obstacle(x,z,w,d);return h+0.04;}
+function table(x,z,w,d,h=0.78){const g=new THREE.Group();g.position.set(x,0,z);
+  g.add(M(B(w,0.05,d),MAT.wood,0,h,0));for(const sx of[-w/2+0.08,w/2-0.08])for(const sz of[-d/2+0.08,d/2-0.08])g.add(M(B(0.06,h,0.06),MAT.inoxDark,sx,h/2,sz));
+  scene.add(g);obstacle(x,z,w,d);return h+0.025;}
+function gondola(x,z,len,shelves=3){const g=new THREE.Group();g.position.set(x,0,z);g.add(M(B(1.0,0.5,len),MAT.plinth,0,0.25,0));
+  const ys=[];for(let i=0;i<shelves;i++){const y=0.6+i*0.5;g.add(M(B(1.0,0.04,len),MAT.whiteSoft,0,y,0));g.add(M(B(0.04,0.5,len),MAT.whiteSoft,0,y+0.25,0));ys.push(y+0.04);}
+  scene.add(g);obstacle(x,z,1.05,len);return ys;}
+function counter(x,z,len,ry=0){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;
+  g.add(M(B(len,0.95,0.75),MAT.white,0,0.475,0));g.add(M(B(len+0.06,0.06,0.82),MAT.pBlack,0,0.98,0));
+  g.add(M(B(len,0.5,0.04),MAT.red,0,1.5,-0.39)); // bandeau rouge
+  scene.add(g);obstacle(x,z,len,0.82);}
+
+/* ===================== PRODUITS — FABRIQUES ===================== */
+const BRANDS={tv:['Samsung','LG','Sony','Philips','TCL','Panasonic'],son:['Sonos','JBL','Bose','Sony','Devialet','Marshall'],phone:['Apple','Samsung','Xiaomi','Google','Oppo','Honor'],
+  info:['Apple','HP','Dell','Asus','Lenovo','Acer','MSI'],petit:['Philips','SEB','Moulinex','De Longhi','Krups','Rowenta','Magimix','Dyson','Bosch'],gros:['Samsung','LG','Bosch','Whirlpool','Liebherr','Electrolux','Beko']};
 const ENERGY={A:'#159a4f',B:'#5fb246',C:'#a9c93a',D:'#e6c200',E:'#f0a500',F:'#e8730c',G:'#e30613'};
-const FIN=['Inox','Blanc','Noir'];
-const cm=v=>Math.round(v*100);
-function code(brand){return brand.slice(0,3).toUpperCase()+rint(100,999)+pick(['X','S','E','I','N','D']);}
+let seed=20260607;const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};
+const pick=a=>a[Math.floor(rnd()*a.length)];const rint=(a,b)=>Math.floor(a+rnd()*(b-a+1));
+const cls=()=>pick(['A','A','B','B','C','D','E']);const code=b=>b.slice(0,3).toUpperCase()+rint(100,999);
 
-/* ============================ FABRIQUES D'APPAREILS ============================ */
-function extMat(f){return f==='Inox'?MAT.inox:f==='Noir'?MAT.blackBody:MAT.white;}
+function makeTV(diag){const g=new THREE.Group();const w=diag*0.0124,h=w*0.57;
+  g.add(M(B(w,h,0.04),MAT.pBlack));const scr=new THREE.Mesh(B(w-0.04,h-0.04,0.005),adMat);scr.position.z=0.025;g.add(scr);
+  return {group:g,w,h,anims:[],foot:{w,d:0.3}};}
+function makeSpeaker(tall){const g=new THREE.Group();const h=tall?0.95:0.34,w=0.24,d=0.28;
+  g.add(M(B(w,h,d),MAT.pBlack,0,h/2,0));g.add(M(B(w-0.04,h-0.04,0.01),MAT.fabric,0,h/2,d/2));
+  for(const cy of[h*0.7,h*0.35])g.add(M(CY(w*0.3,w*0.3,0.02,18),MAT.pDark,0,cy,d/2+0.005).rotateX(Math.PI/2));
+  return {group:g,anims:[],foot:{w,d},h};}
+function makeSoundbar(){const g=new THREE.Group();g.add(M(B(1.0,0.08,0.1),MAT.pBlack,0,0.04,0));g.add(M(B(0.96,0.05,0.005),MAT.fabric,0,0.04,0.052));return {group:g,anims:[],foot:{w:1,d:0.1},h:0.08};}
+function makeHeadphones(){const g=new THREE.Group();const band=new THREE.Mesh(new THREE.TorusGeometry(0.11,0.018,10,24,Math.PI),MAT.pBlack);band.position.y=0.18;g.add(band);
+  for(const sx of[-0.11,0.11]){g.add(M(CY(0.06,0.06,0.05,20),MAT.pDark,sx,0.08,0).rotateZ(Math.PI/2));g.add(M(CY(0.05,0.05,0.01,20),MAT.fabric,sx+(sx<0?0.026:-0.026),0.08,0).rotateZ(Math.PI/2));}
+  const rod=M(CY(0.012,0.012,0.16,8),MAT.inoxDark,0,0.08,0);g.add(rod);g.add(M(CY(0.07,0.08,0.02,16),MAT.pBlack,0,0,0));
+  return {group:g,anims:[],foot:{w:0.24,d:0.2},h:0.24};}
+function makePhone(){const g=new THREE.Group();g.add(M(B(0.072,0.152,0.009),MAT.pBlack,0,0.076,0));
+  const scr=new THREE.Mesh(B(0.062,0.14,0.001),phoneMat);scr.position.set(0,0.076,0.006);g.add(scr);
+  g.rotation.x=-0.32;g.position.y=0.0;return {group:g,anims:[],foot:{w:0.1,d:0.1},h:0.16};}
+function makeLaptop(){const g=new THREE.Group();g.add(M(B(0.34,0.014,0.24),MAT.pSilver,0,0.007,0));
+  const lid=new THREE.Group();lid.position.set(0,0.014,-0.115);g.add(lid);
+  lid.add(M(B(0.34,0.21,0.01),MAT.pSilver,0,0.105,0));const scr=new THREE.Mesh(B(0.31,0.185,0.002),laptopMat);scr.position.set(0,0.105,0.007);lid.add(scr);
+  lid.rotation.x=-1.92;return {group:g,anims:[],foot:{w:0.36,d:0.26},h:0.02};}
+function makeSmall(type){const g=new THREE.Group();const col=pick([MAT.pBlack,MAT.pSilver,MAT.pWhite,MAT.red]);const anims=[];let h=0.3;
+  if(type==='micro'){h=0.3;const w=0.48,d=0.36,hw=w/2,hd=d/2;
+    g.add(M(B(w,h,0.04),MAT.pBlack,0,h/2,-hd));g.add(M(B(0.04,h,d),MAT.pBlack,hw,h/2,0));g.add(M(B(w,0.04,d),MAT.pBlack,0,0,0));g.add(M(B(w,0.04,d),MAT.pBlack,0,h,0));
+    g.add(M(B(0.1,h,d),MAT.pBlack,-hw+0.05,h/2,0)); // bandeau commandes gauche
+    const piv=new THREE.Group();piv.position.set(hw,h/2,hd);g.add(piv);piv.add(M(B(w-0.12,h,0.04),MAT.pBlack,-(w-0.12)/2,0,0));
+    piv.add(M(B(w-0.26,h-0.08,0.02),MAT.ovenGlass,-(w-0.12)/2,0,0.03));anims.push({target:piv,kind:'rotate',axis:'y',from:0,to:2.0});
+  }else if(type==='cafe'){h=0.34;g.add(M(B(0.26,h,0.34),col,0,h/2,0));g.add(M(CY(0.05,0.06,0.05,16),MAT.pDark,0,0.06,0.15));g.add(M(B(0.18,0.06,0.02),MAT.metalIn,0,0.18,0.18));
+  }else if(type==='bouilloire'){h=0.26;g.add(M(CY(0.1,0.12,h,20),col,0,h/2,0));g.add(M(CY(0.11,0.11,0.02,20),MAT.pBlack,0,0,0));g.add(M(new THREE.TorusGeometry(0.06,0.012,8,16,Math.PI),MAT.pBlack,0.14,h*0.6,0).rotateY(Math.PI/2));
+  }else if(type==='blender'){h=0.42;g.add(M(B(0.18,0.16,0.18),col,0,0.08,0));g.add(M(CY(0.07,0.05,0.26,16),MAT.glass,0,0.16+0.13,0));
+  }else if(type==='grillepain'){h=0.2;g.add(M(B(0.3,h,0.16),col,0,h/2,0));for(const sx of[-0.06,0.06])g.add(M(B(0.08,0.02,0.1),MAT.pBlack,sx,h,0));
+  }else if(type==='friteuse'){h=0.34;g.add(M(B(0.28,h,0.3),col,0,h/2,0));g.add(M(B(0.22,0.06,0.04),MAT.pDark,0,0.1,0.15));g.add(M(B(0.18,0.08,0.02),MAT.screenOff,0,h-0.06,0.151));
+  }else if(type==='aspi'){h=0.28;g.add(M(CY(0.14,0.14,0.16,22),col,0,0.1,0));g.add(M(CY(0.04,0.04,0.4,10),MAT.inoxDark,0.05,0.3,0).rotateZ(-0.3));
+  }else{h=0.3;g.add(M(B(0.26,h,0.3),col,0,h/2,0));g.add(M(CY(0.08,0.09,0.18,18),MAT.glass,0,h-0.05,0.05));}
+  return {group:g,anims,foot:{w:0.4,d:0.4},h};}
 
-// ---- porte battante verticale (frigos) ----
-function vDoor(g,width,height,cx,cy,fz,side,mat,anims){
-  const hingeX = side<0 ? cx-width/2 : cx+width/2;
-  const dir = side<0 ? 1 : -1;
-  const pivot=new THREE.Group();pivot.position.set(hingeX,cy,fz);g.add(pivot);
-  pivot.add(M(B(width,height,0.05),mat,dir*width/2,0,0.025));
-  const hx=width-0.07;
-  pivot.add(M(B(0.03,height*0.55,0.04),MAT.handle,dir*hx,0,0.07));
-  anims.push({target:pivot,kind:'rotate',axis:'y',from:0,to:side<0?-2.0:2.0});
-}
+/* gros électro (réutilisé, version compacte) */
+function vDoor(g,w,hgt,cx,cy,fz,side,mat,anims){const hx=side<0?cx-w/2:cx+w/2,dir=side<0?1:-1;const p=new THREE.Group();p.position.set(hx,cy,fz);g.add(p);
+  p.add(M(B(w,hgt,0.05),mat,dir*w/2,0,0.025));p.add(M(B(0.03,hgt*0.55,0.04),MAT.handle,dir*(w-0.07),0,0.07));anims.push({target:p,kind:'rotate',axis:'y',from:0,to:side<0?-2:2});}
+function makeFridge(sub){const fin=pick(['Inox','Blanc','Inox']);const ext=fin==='Inox'?MAT.inox:MAT.white;const g=new THREE.Group();const anims=[];
+  let w,hh; if(sub==='us'){w=0.91;hh=1.78;}else if(sub==='combine'){w=0.6;hh=1.86;}else{w=0.6;hh=1.45;}const d=0.7,hw=w/2,hy=hh/2,hd=d/2,t=.04,fz=hd;
+  g.add(M(B(w,t,d),MAT.fridgeIn,0,-hy,0));g.add(M(B(w,t,d),MAT.fridgeIn,0,hy,0));g.add(M(B(t,hh,d),MAT.fridgeIn,-hw,0,0));g.add(M(B(t,hh,d),MAT.fridgeIn,hw,0,0));g.add(M(B(w,hh,t),MAT.fridgeIn,0,0,-hd));
+  for(let i=0;i<4;i++)g.add(M(B(w-0.06,0.015,d-0.1),MAT.glass,0,-hy+hh*(i+1)/5,0));
+  if(sub==='us'){vDoor(g,w/2,hh,-w/4,0,fz,-1,ext,anims);vDoor(g,w/2,hh,w/4,0,fz,1,ext,anims);}
+  else if(sub==='combine'){vDoor(g,w,hh*0.62,0,hy-hh*0.31,fz,-1,ext,anims);vDoor(g,w,hh*0.38,0,-hy+hh*0.19,fz,-1,ext,anims);}
+  else vDoor(g,w,hh,0,0,fz,-1,ext,anims);
+  return {group:g,anims,foot:{w,d:d+0.5},h:hh,fin};}
+function makeWasher(){const g=new THREE.Group();const anims=[];const w=0.6,hh=0.85,d=0.6,hw=w/2,hy=hh/2,hd=d/2,t=.04,fz=hd;const ext=MAT.white;
+  g.add(M(B(w,hh,t),ext,0,0,-hd));g.add(M(B(t,hh,d),ext,-hw,0,0));g.add(M(B(t,hh,d),ext,hw,0,0));g.add(M(B(w,t,d),ext,0,-hy,0));g.add(M(B(w,t,d),ext,0,hy,0));
+  const r=0.2;g.add(M(B(w,0.18,0.02),ext,0,hy-0.09,fz));g.add(M(B((w-2*r)/2,0.5,0.02),ext,-(r+(w-2*r)/4),-0.05,fz));g.add(M(B((w-2*r)/2,0.5,0.02),ext,(r+(w-2*r)/4),-0.05,fz));
+  g.add(M(B(0.3,0.08,0.02),MAT.screenOff,-0.1,hy-0.09,fz+0.005));
+  const drum=M(CY(r-0.03,r-0.03,0.4,26,true),MAT.metalIn,0,-0.05,fz-0.22);drum.rotation.x=Math.PI/2;g.add(drum);g.add(M(CY(r-0.03,r-0.03,0.02,26),MAT.inoxDark,0,-0.05,fz-0.42).rotateX(Math.PI/2));
+  const piv=new THREE.Group();piv.position.set(-r,-0.05,fz);g.add(piv);piv.add(M(new THREE.TorusGeometry(r,0.04,10,24),MAT.inoxDark,r,0,0.02));const gl=M(CY(r-0.02,r-0.02,0.02,24),MAT.glass,r,0,0.02);gl.rotation.x=Math.PI/2;piv.add(gl);
+  anims.push({target:piv,kind:'rotate',axis:'y',from:0,to:-2.2});return {group:g,anims,foot:{w,d:d+0.4},h:hh};}
+function makeDish(){const g=new THREE.Group();const anims=[];const w=0.6,hh=0.84,d=0.6,hw=w/2,hy=hh/2,hd=d/2,t=.04,fz=hd;const ext=MAT.inox;
+  g.add(M(B(w,t,d),MAT.metalIn,0,-hy,0));g.add(M(B(w,t,d),MAT.metalIn,0,hy,0));g.add(M(B(t,hh,d),MAT.metalIn,-hw,0,0));g.add(M(B(t,hh,d),MAT.metalIn,hw,0,0));g.add(M(B(w,hh,t),MAT.metalIn,0,0,-hd));
+  for(const y of[-0.18,0.18]){const b=new THREE.Group();b.position.set(0,y,0);g.add(b);b.add(M(B(w-0.1,0.02,d-0.12),MAT.grate,0,0,0));for(let i=-2;i<=2;i++)b.add(M(B(0.012,0.1,d-0.12),MAT.grate,i*0.1,0.05,0));anims.push({target:b,kind:'slide',axis:'z',from:0,to:0.3});}
+  const piv=new THREE.Group();piv.position.set(0,-hy,fz);g.add(piv);piv.add(M(B(w,hh,0.05),ext,0,hy,0.025));piv.add(M(B(w*0.7,0.04,0.04),MAT.handle,0,hh-0.07,0.06));
+  anims.push({target:piv,kind:'rotate',axis:'x',from:0,to:Math.PI/2});return {group:g,anims,foot:{w,d:d+0.6},h:hh};}
+function makeOven(){const g=new THREE.Group();const anims=[];const w=0.595,hh=0.595,d=0.55,hw=w/2,hy=hh/2,hd=d/2,t=.04,fz=hd;
+  g.add(M(B(w,t,d),MAT.ovenIn,0,-hy,0));g.add(M(B(w,t,d),MAT.ovenIn,0,hy,0));g.add(M(B(t,hh,d),MAT.ovenIn,-hw,0,0));g.add(M(B(t,hh,d),MAT.ovenIn,hw,0,0));g.add(M(B(w,hh,t),MAT.ovenIn,0,0,-hd));
+  g.add(M(B(w-0.08,0.012,d-0.08),MAT.grate,0,-0.08,0));g.add(M(B(w-0.08,0.012,d-0.08),MAT.grate,0,0.1,0));
+  g.add(M(B(w,0.1,0.03),MAT.inox,0,hy+0.04,fz));g.add(M(B(w*0.4,0.05,0.02),MAT.screenOff,-0.08,hy+0.04,fz+0.02));
+  const ph=hh*0.82;const piv=new THREE.Group();piv.position.set(0,-hy,fz);g.add(piv);piv.add(M(B(w,ph,0.05),MAT.inox,0,ph/2,0.025));piv.add(M(B(w*0.74,ph*0.6,0.02),MAT.ovenGlass,0,ph/2,0.05));piv.add(M(B(w*0.9,0.04,0.05),MAT.handle,0,ph-0.05,0.07));
+  anims.push({target:piv,kind:'rotate',axis:'x',from:0,to:Math.PI/2});return {group:g,anims,foot:{w,d:d+0.55},h:hh};}
 
-function makeFridge(s){
-  const g=new THREE.Group();const ext=extMat(s.fin);const anims=[];
-  const hw=s.w/2,hh=s.h/2,hd=s.d/2,t=0.04,fz=hd;
-  // caisson (face avant ouverte) — intérieur clair
-  g.add(M(B(s.w,t,s.d),MAT.fridgeIn,0,-hh,0));
-  g.add(M(B(s.w,t,s.d),MAT.fridgeIn,0,hh,0));
-  g.add(M(B(t,s.h,s.d),MAT.fridgeIn,-hw,0,0));
-  g.add(M(B(t,s.h,s.d),MAT.fridgeIn,hw,0,0));
-  g.add(M(B(s.w,s.h,t),MAT.fridgeIn,0,0,-hd));
-  // étagères verre
-  function shelves(y0,y1,n,x0,x1){for(let i=0;i<n;i++){const y=y0+(y1-y0)*(i+1)/(n+1);
-    g.add(M(B((x1-x0)-0.06,0.015,s.d-0.1),MAT.glass,(x0+x1)/2,y,0));}}
-  if(s.sub==='us'||s.sub==='side'){
-    shelves(-hh,hh,4,-hw,0);shelves(-hh,hh,4,0,hw);
-    vDoor(g,s.w/2,s.h,-s.w/4,0,fz,-1,ext,anims);
-    vDoor(g,s.w/2,s.h, s.w/4,0,fz, 1,ext,anims);
-  }else if(s.sub==='french'){
-    const ph=s.h*0.6,fh=s.h*0.4,py=hh-ph/2,fyc=-hh+fh/2;
-    shelves(py-ph/2,py+ph/2,3,-hw,0);shelves(py-ph/2,py+ph/2,3,0,hw);
-    vDoor(g,s.w/2,ph,-s.w/4,py,fz,-1,ext,anims);
-    vDoor(g,s.w/2,ph, s.w/4,py,fz, 1,ext,anims);
-    // tiroir congélateur (coulisse)
-    const dr=new THREE.Group();dr.position.set(0,fyc,fz);g.add(dr);
-    dr.add(M(B(s.w,fh,0.05),ext,0,0,0.025));dr.add(M(B(s.w*0.5,0.03,0.04),MAT.handle,0,fh*0.35,0.07));
-    dr.add(M(B(s.w-0.1,fh-0.08,s.d-0.12),MAT.metalIn,0,-0.02,-(s.d-0.12)/2));
-    anims.push({target:dr,kind:'slide',axis:'z',from:fz,to:fz+s.d*0.55});
-  }else if(s.sub==='combine'){
-    const fh=s.h*0.62,gh=s.h*0.38,fy=hh-fh/2,gy=-hh+gh/2;
-    shelves(fy-fh/2,fy+fh/2,3,-hw,hw);
-    // 2 tiroirs blancs dans le congel
-    g.add(M(B(s.w-0.1,gh*0.4,s.d-0.14),MAT.fridgeIn,0,gy+gh*0.18,0));
-    g.add(M(B(s.w-0.1,gh*0.4,s.d-0.14),MAT.fridgeIn,0,gy-gh*0.18,0));
-    vDoor(g,s.w,fh,0,fy,fz,-1,ext,anims);
-    vDoor(g,s.w,gh,0,gy,fz,-1,ext,anims);
-  }else{ // 1porte
-    shelves(-hh,hh,4,-hw,hw);
-    vDoor(g,s.w,s.h,0,0,fz,-1,ext,anims);
-  }
-  return {group:g,anims,foot:{w:s.w,d:s.d+0.5}};
-}
+/* ===================== PLACEMENT / CATALOGUE ===================== */
+const prodCountEl=document.getElementById('prodCount');
+function placeProduct(r,x,z,ry,yBase,meta,solid){r.group.position.set(x,(yBase||0)+(r.h?r.h/2:0)*0,z);
+  if(yBase!==undefined)r.group.position.y=yBase;r.group.rotation.y=ry||0;scene.add(r.group);reg(r.group,meta,r.anims,r.foot,solid);prodCountEl.textContent=products.length;}
 
-function makeWasher(s){ // lave-linge hublot
-  const g=new THREE.Group();const ext=s.fin==='Inox'?MAT.inox:s.fin==='Noir'?MAT.blackBody:MAT.white;const anims=[];
-  const hw=s.w/2,hh=s.h/2,hd=s.d/2,t=0.04,fz=hd;
-  // caisson fermé (sauf ouverture hublot via cadre)
-  g.add(M(B(s.w,s.h,t),ext,0,0,-hd));
-  g.add(M(B(t,s.h,s.d),ext,-hw,0,0));g.add(M(B(t,s.h,s.d),ext,hw,0,0));
-  g.add(M(B(s.w,t,s.d),ext,0,-hh,0));g.add(M(B(s.w,t,s.d),ext,0,hh,0));
-  // face avant : cadre autour du hublot
-  const r=Math.min(hw,s.h*0.34)*0.78;
-  g.add(M(B(s.w,s.h*0.22,0.02),ext,0,hh-s.h*0.11,fz)); // bandeau haut
-  g.add(M(B(s.w,s.h*0.12,0.02),ext,0,-hh+s.h*0.06,fz));
-  g.add(M(B((s.w-2*r)/2-0.02,s.h*0.62,0.02),ext,-(r+((s.w-2*r)/4)),-s.h*0.05,fz));
-  g.add(M(B((s.w-2*r)/2-0.02,s.h*0.62,0.02),ext, (r+((s.w-2*r)/4)),-s.h*0.05,fz));
-  // bandeau commandes
-  g.add(M(B(s.w*0.45,s.h*0.1,0.025),MAT.screen,-s.w*0.02,hh-s.h*0.11,fz+0.005));
-  g.add(M(CY(0.04,0.04,0.03,16),MAT.knob,s.w*0.34,hh-s.h*0.11,fz+0.01).rotateX(Math.PI/2));
-  // tambour (cylindre ouvert recessé)
-  const drum=new THREE.Mesh(CY(r-0.03,r-0.03,0.42,28,true),MAT.metalIn);drum.rotation.x=Math.PI/2;
-  drum.position.set(0,-s.h*0.05,fz-0.24);g.add(drum);
-  g.add(M(CY(r-0.03,r-0.03,0.02,28),MAT.inoxDark,0,-s.h*0.05,fz-0.45).rotateX(Math.PI/2)); // fond tambour
-  // hublot rond (charnière gauche)
-  const pivot=new THREE.Group();pivot.position.set(-r,-s.h*0.05,fz);g.add(pivot);
-  const ring=new THREE.Mesh(new THREE.TorusGeometry(r,0.04,12,28),MAT.inoxDark);ring.position.set(r,0,0.02);pivot.add(ring);
-  const gl=new THREE.Mesh(CY(r-0.02,r-0.02,0.02,28),MAT.glass);gl.rotation.x=Math.PI/2;gl.position.set(r,0,0.02);pivot.add(gl);
-  anims.push({target:pivot,kind:'rotate',axis:'y',from:0,to:-2.2});
-  return {group:g,anims,foot:{w:s.w,d:s.d+0.4}};
-}
+// ---- TÉLÉPHONIE (front gauche) — podiums + téléphones ----
+hangSign(-9.5,11.5,3.2,signTex('TÉLÉPHONIE',null,'#0c0d0f','#fff',RED));
+for(let i=0;i<4;i++){const px=-13+ (i%2)*3, pz=9.5+Math.floor(i/2)*3;const top=podium(px,pz,1.3,0.9);
+  for(let j=0;j<4;j++){const ph=makePhone();const b=BRANDS.phone[(i*4+j)%BRANDS.phone.length];const price=rint(199,1479);
+    placeProduct(ph,px-0.4+(j%2)*0.8,pz-0.25+Math.floor(j/2)*0.5,(j*0.4),top,
+      {cat:'Téléphonie',name:b+' Smartphone '+rint(11,16),brand:b,priceTTC:price,energy:cls(),sw:'#1b1c1e',
+       specs:[['Écran',rint(61,68)/10+'" OLED'],['Stockage',pick([128,256,512])+' Go'],['5G','Oui'],['Photo',rint(48,200)+' Mpx'],['Réf',code(b)]]},false);}}
 
-function makeDishwasher(s){ // lave-vaisselle, porte abattante
-  const g=new THREE.Group();const ext=s.fin==='Inox'?MAT.inox:s.fin==='Noir'?MAT.blackBody:MAT.white;const anims=[];
-  const hw=s.w/2,hh=s.h/2,hd=s.d/2,t=0.04,fz=hd;
-  g.add(M(B(s.w,t,s.d),MAT.metalIn,0,-hh,0));g.add(M(B(s.w,t,s.d),MAT.metalIn,0,hh,0));
-  g.add(M(B(t,s.h,s.d),MAT.metalIn,-hw,0,0));g.add(M(B(t,s.h,s.d),MAT.metalIn,hw,0,0));
-  g.add(M(B(s.w,s.h,t),MAT.metalIn,0,0,-hd));
-  // paniers (coulissent vers l'avant à l'ouverture)
-  function basket(y){const b=new THREE.Group();b.position.set(0,y,0);g.add(b);
-    b.add(M(B(s.w-0.1,0.02,s.d-0.12),MAT.grate,0,0,0));
-    for(let i=-2;i<=2;i++)b.add(M(B(0.012,0.12,s.d-0.12),MAT.grate,i*(s.w*0.16),0.06,0));
-    anims.push({target:b,kind:'slide',axis:'z',from:0,to:s.d*0.5});return b;}
-  basket(-s.h*0.18);basket(s.h*0.18);
-  // porte abattante (charnière bas)
-  const pivot=new THREE.Group();pivot.position.set(0,-hh,fz);g.add(pivot);
-  pivot.add(M(B(s.w,s.h,0.05),ext,0,hh,0.025));
-  pivot.add(M(B(s.w*0.7,0.04,0.04),MAT.handle,0,s.h-0.07,0.06));
-  g.add(M(B(s.w*0.9,0.05,0.02),MAT.screen,0,hh-0.05,fz+0.005)); // bandeau commandes (haut)
-  anims.push({target:pivot,kind:'rotate',axis:'x',from:0,to:Math.PI/2});
-  return {group:g,anims,foot:{w:s.w,d:s.d+0.6}};
-}
+// ---- INFORMATIQUE (gauche) — tables + ordis ----
+hangSign(-13.5,4,3.4,signTex('INFORMATIQUE',null,'#0c0d0f','#fff',RED));
+for(let r0=0;r0<2;r0++){const tz=2.5+r0*3.4;const top=table(-13.5,tz,5,1.0);
+  for(let j=0;j<4;j++){const lp=makeLaptop();const b=BRANDS.info[(r0*4+j)%BRANDS.info.length];
+    placeProduct(lp,-15.4+j*1.25,tz,0,top,{cat:'Informatique',name:b+' Laptop '+rint(13,16)+'"',brand:b,priceTTC:rint(549,2299),energy:cls(),sw:'#b9bdc2',
+      specs:[['Processeur',pick(['Intel Core i5','Intel Core i7','AMD Ryzen 7','Apple M3'])],['RAM',pick([8,16,32])+' Go'],['SSD',pick([256,512,1024])+' Go'],['Écran',pick(['Full HD','2.8K OLED','Retina'])],['Réf',code(b)]]},false);}}
 
-function makeOven(s){ // four encastrable, porte abattante + vitre
-  const g=new THREE.Group();const anims=[];
-  const hw=s.w/2,hh=s.h/2,hd=s.d/2,t=0.04,fz=hd;
-  g.add(M(B(s.w,t,s.d),MAT.ovenIn,0,-hh,0));g.add(M(B(s.w,t,s.d),MAT.ovenIn,0,hh,0));
-  g.add(M(B(t,s.h,s.d),MAT.ovenIn,-hw,0,0));g.add(M(B(t,s.h,s.d),MAT.ovenIn,hw,0,0));
-  g.add(M(B(s.w,s.h,t),MAT.ovenIn,0,0,-hd));
-  // grilles
-  g.add(M(B(s.w-0.08,0.012,s.d-0.08),MAT.grate,0,-s.h*0.12,0));
-  g.add(M(B(s.w-0.08,0.012,s.d-0.08),MAT.grate,0, s.h*0.16,0));
-  // bandeau commandes (haut, fixe)
-  g.add(M(B(s.w,s.h*0.16,0.03),MAT.inox,0,hh+s.h*0.0,fz)); // façade haute
-  g.add(M(B(s.w*0.4,s.h*0.06,0.02),MAT.screen,-s.w*0.05,hh-s.h*0.02,fz+0.02));
-  for(let i=0;i<2;i++)g.add(M(CY(0.035,0.035,0.03,14),MAT.knob,(i===0?s.w*0.28:s.w*0.4),hh-s.h*0.02,fz+0.02).rotateX(Math.PI/2));
-  // porte (charnière bas) inox + vitre sombre
-  const ph=s.h*0.82;const pivot=new THREE.Group();pivot.position.set(0,-hh,fz);g.add(pivot);
-  pivot.add(M(B(s.w,ph,0.05),MAT.inox,0,ph/2,0.025));
-  pivot.add(M(B(s.w*0.74,ph*0.6,0.02),MAT.ovenGlass,0,ph/2,0.05));
-  pivot.add(M(B(s.w*0.9,0.04,0.05),MAT.handle,0,ph-0.05,0.07));
-  anims.push({target:pivot,kind:'rotate',axis:'x',from:0,to:Math.PI/2});
-  return {group:g,anims,foot:{w:s.w,d:s.d+0.55}};
-}
+// ---- SON (droite) — colonnes, soundbars, casques ----
+hangSign(12,11.5,2.6,signTex('SON',null,'#0c0d0f','#fff',RED));
+for(let i=0;i<6;i++){const sp=makeSpeaker(i<4);const b=BRANDS.son[i%BRANDS.son.length];const x=9+(i%3)*2.4,z=9+Math.floor(i/3)*2.6;
+  placeProduct(sp,x,z,rnd()*0.6-0.3,0,{cat:'Son',name:b+' Enceinte '+(i<4?'colonne':'compacte'),brand:b,priceTTC:rint(129,2490),energy:cls(),sw:'#1b1c1e',
+    specs:[['Type',i<4?'Colonne':'Bibliothèque'],['Puissance',rint(60,400)+' W'],['Bluetooth',pick(['5.0','5.3'])],['Wi-Fi',pick(['Oui','Non'])],['Réf',code(b)]]},true);}
+const sbTop=table(15.5,5,2.4,0.8);
+for(let i=0;i<3;i++){const sb=makeSoundbar();const b=BRANDS.son[i%BRANDS.son.length];placeProduct(sb,15.5,4+i*1,0,sbTop,{cat:'Son',name:b+' Barre de son',brand:b,priceTTC:rint(199,1290),energy:cls(),sw:'#1b1c1e',specs:[['Canaux',pick(['2.1','3.1','5.1.2'])],['Dolby Atmos',pick(['Oui','Non'])],['Caisson','Sans fil'],['Réf',code(b)]]},false);}
+const hpTop=podium(11,4.5,1.4,1.0,0.95);
+for(let i=0;i<4;i++){const hp=makeHeadphones();const b=BRANDS.son[i%BRANDS.son.length];placeProduct(hp,10.4+(i%2)*1.2,4.2+Math.floor(i/2)*0.6,0,hpTop,{cat:'Son',name:b+' Casque ANC',brand:b,priceTTC:rint(99,449),energy:cls(),sw:'#1b1c1e',specs:[['Réduction de bruit','Active'],['Autonomie',rint(24,60)+' h'],['Bluetooth','5.3'],['Réf',code(b)]]},false);}
 
-function makeCooktop(s){ // plaque (posée dans la gondole) — pas de porte
-  const g=new THREE.Group();
-  g.add(M(B(s.w,0.04,s.d),MAT.blackGlass,0,0,0)); // dalle verre noir
-  if(s.kind==='Gaz'){
-    const pos=[[-s.w*0.26,-s.d*0.22],[s.w*0.26,-s.d*0.22],[-s.w*0.26,s.d*0.22],[s.w*0.26,s.d*0.22]];
-    for(const[px,pz]of pos){g.add(M(CY(0.05,0.07,0.04,16),MAT.inoxDark,px,0.04,pz));
-      for(let a=0;a<4;a++){const gr=M(B(0.02,0.015,0.16),MAT.grate,px,0.07,pz);gr.rotation.y=a*Math.PI/4;g.add(gr);} }
-  }else{
-    const zones=s.zones||4;const cols=zones>4?3:2;
-    for(let i=0;i<zones;i++){const px=((i%cols)-(cols-1)/2)*s.w*0.3;const pz=(Math.floor(i/cols)-0.5)*s.d*0.4;
-      const ring=new THREE.Mesh(new THREE.RingGeometry(0.07,0.085,24),new THREE.MeshBasicMaterial({color:'#444',side:THREE.DoubleSide}));
-      ring.rotation.x=-Math.PI/2;ring.position.set(px,0.022,pz);g.add(ring);}
-  }
-  // bandeau tactile
-  g.add(M(B(s.w*0.5,0.015,s.d*0.12),MAT.screen,0,0.022,s.d*0.4));
-  return {group:g,anims:[],foot:{w:s.w,d:s.d}};
-}
+// ---- TV (mur du fond) — grille + home cinéma ----
+hangSign(0,-12.5,3.6,signTex('TÉLÉVISION',null,'#0c0d0f','#fff',RED),3.9);
+const tvWall=new THREE.Mesh(B(26,4,0.2),new THREE.MeshStandardMaterial({color:'#15161a',roughness:.8}));tvWall.position.set(0,2.2,-HD+0.16);scene.add(tvWall);
+for(let r0=0;r0<2;r0++)for(let c=0;c<5;c++){const diag=pick([50,55,65,75]);const tv=makeTV(diag);const b=BRANDS.tv[(r0*5+c)%BRANDS.tv.length];
+  tv.group.position.set(-9.6+c*4.8,1.5+r0*1.7,-HD+0.3);scene.add(tv.group);reg(tv.group,{cat:'Télévision',name:b+' TV '+pick(['LED','QLED','OLED'])+' '+diag+'"',brand:b,priceTTC:rint(399,2999),energy:cls(),sw:'#1b1c1e',
+    specs:[['Diagonale',diag+'"'],['Définition',pick(['4K UHD','4K UHD','8K'])],['Dalle',pick(['LED','QLED','OLED'])],['Smart TV',pick(['Google TV','Tizen','webOS'])],['Réf',code(b)]]},tv.anims,tv.foot,false);prodCountEl.textContent=products.length;}
+// home cinéma sur meubles
+for(let i=0;i<4;i++){const x=-9+i*6;const mz=-10.5;const meub=new THREE.Group();meub.position.set(x,0,mz);meub.add(M(B(2.2,0.45,0.5),MAT.pBlack,0,0.45,0));scene.add(meub);obstacle(x,mz,2.2,0.5);
+  const diag=pick([55,65,75]);const tv=makeTV(diag);tv.group.position.set(x,1.5,mz);scene.add(tv.group);const b=BRANDS.tv[i%BRANDS.tv.length];
+  reg(tv.group,{cat:'Télévision',name:b+' TV OLED '+diag+'"',brand:b,priceTTC:rint(799,3490),energy:cls(),sw:'#1b1c1e',specs:[['Diagonale',diag+'"'],['Définition','4K UHD'],['Dalle','OLED'],['HDMI 2.1','4 ports'],['Réf',code(b)]]},tv.anims,tv.foot,false);
+  const sb=makeSoundbar();sb.group.position.set(x,0.72,mz+0.2);scene.add(sb.group);reg(sb.group,{cat:'Son',name:b+' Barre de son 5.1',brand:b,priceTTC:rint(299,990),energy:cls(),sw:'#1b1c1e',specs:[['Canaux','5.1'],['Atmos','Oui'],['Réf',code(b)]]},[],sb.foot,false);prodCountEl.textContent=products.length;}
 
-function makePiano(s){ // piano de cuisson : four (porte abattante) + table de cuisson
-  const g=new THREE.Group();const anims=[];
-  const bw=s.w,bh=0.9,bd=s.d,hw=bw/2,hd=bd/2,t=0.05,fz=hd;
-  // corps four (intérieur sombre, face ouverte)
-  g.add(M(B(bw,t,bd),MAT.ovenIn,0,-bh/2,0));g.add(M(B(bw,t,bd),MAT.ovenIn,0,bh*0.32,0));
-  g.add(M(B(t,bh*0.84,bd),MAT.inox,-hw,-0.04,0));g.add(M(B(t,bh*0.84,bd),MAT.inox,hw,-0.04,0));
-  g.add(M(B(bw,bh*0.84,t),MAT.ovenIn,0,-0.04,-hd));
-  g.add(M(B(bw-0.1,0.012,bd-0.1),MAT.grate,0,-0.1,0));
-  // table de cuisson dessus (inox + foyers)
-  g.add(M(B(bw,0.06,bd),MAT.inox,0,bh*0.34,0));
-  const burners=s.foyers||5;const pos=[[-bw*0.3,-bd*0.22],[bw*0.3,-bd*0.22],[-bw*0.3,bd*0.22],[bw*0.3,bd*0.22],[0,0]];
-  for(let i=0;i<burners;i++){const[px,pz]=pos[i%5];g.add(M(CY(0.06,0.08,0.04,16),MAT.inoxDark,px,bh*0.37,pz));
-    for(let a=0;a<4;a++){const gr=M(B(0.02,0.015,0.18),MAT.grate,px,bh*0.4,pz);gr.rotation.y=a*Math.PI/4;g.add(gr);} }
-  // dosseret + manettes
-  g.add(M(B(bw,0.28,0.06),MAT.inox,0,bh*0.5,-hd+0.03));
-  for(let i=0;i<burners;i++)g.add(M(CY(0.04,0.04,0.04,14),MAT.knob,-bw*0.4+i*(bw*0.8/(burners-1)),bh*0.18,fz).rotateX(Math.PI/2));
-  // porte four
-  const pivot=new THREE.Group();pivot.position.set(0,-bh/2,fz);g.add(pivot);
-  pivot.add(M(B(bw,bh*0.82,0.05),MAT.inox,0,bh*0.41,0.025));
-  pivot.add(M(B(bw*0.7,bh*0.5,0.02),MAT.ovenGlass,0,bh*0.41,0.05));
-  pivot.add(M(B(bw*0.85,0.045,0.05),MAT.handle,0,bh*0.78,0.07));
-  anims.push({target:pivot,kind:'rotate',axis:'x',from:0,to:Math.PI/2});
-  return {group:g,anims,foot:{w:bw,d:bd+0.55}};
-}
+// ---- PETIT ÉLECTROMÉNAGER (centre) — gondoles ----
+hangSign(0,4,3.2,signTex('PETIT ÉLECTRO',null,'#0c0d0f','#fff',RED));
+const smallTypes=['cafe','micro','bouilloire','blender','grillepain','friteuse','aspi','robot'];let sc=0;
+for(let gi=0;gi<2;gi++){const gx=-2.5+gi*2.5;const ys=gondola(gx,4.5,7,3);
+  for(let s=0;s<ys.length;s++)for(let k=0;k<4;k++){const tp=smallTypes[sc%smallTypes.length];sc++;const o=makeSmall(tp);const b=BRANDS.petit[sc%BRANDS.petit.length];
+    const names={cafe:'Machine à café',micro:'Micro-ondes',bouilloire:'Bouilloire',blender:'Blender',grillepain:'Grille-pain',friteuse:'Friteuse sans huile',aspi:'Aspirateur',robot:'Robot cuiseur'};
+    placeProduct(o,gx-1.05+k*0.7,4.5-3+0.05,0,ys[s],{cat:'Petit électroménager',name:b+' '+names[tp],brand:b,priceTTC:rint(29,499),energy:cls(),sw:'#1b1c1e',
+      specs:[['Type',names[tp]],['Marque',b],['Garantie','2 ans'],['Réf',code(b)]]},false);
+    o.group.position.set(gx-1.05+k*0.7,ys[s],4.5-3+0.05+ (tp==='micro'?0.18:0));}}
 
-/* ============================ MOBILIER ============================ */
-function plinth(x,z,w,d){const p=M(B(w,0.08,d),MAT.plinth,x,0.04,z);scene.add(p);
-  obstacles.push({minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2});}
-function gondola(x,z,len){ // gondole basse blanche (accueille les plaques)
-  const h=0.9;const g=new THREE.Group();g.position.set(x,0,z);
-  g.add(M(B(1.0,h,len),MAT.plinth,0,h/2,0));
-  g.add(M(B(1.06,0.05,len+0.04),MAT.whiteSoft,0,h+0.02,0)); // plateau
-  scene.add(g);obstacles.push({minX:x-0.55,maxX:x+0.55,minZ:z-len/2,maxZ:z+len/2});
-  return {top:h+0.06};
-}
-function ovenColumn(x,ovens){ // colonne blanche "mur de fours" (3 niches)
-  const cw=0.74,ch=2.35,cd=0.62,z=-HD+cd/2+0.15;
-  const col=new THREE.Group();col.position.set(x,0,z);
-  col.add(M(B(0.06,ch,cd),MAT.plinth,-cw/2,ch/2,0));col.add(M(B(0.06,ch,cd),MAT.plinth,cw/2,ch/2,0));
-  col.add(M(B(cw,0.06,cd),MAT.plinth,0,ch,0));col.add(M(B(cw,0.06,cd),MAT.plinth,0,0.03,0));
-  col.add(M(B(cw,ch,0.04),MAT.whiteSoft,0,ch/2,-cd/2));
-  scene.add(col);obstacles.push({minX:x-cw/2,maxX:x+cw/2,minZ:z-cd/2,maxZ:HD});
-  const ys=[0.55,1.2,1.85];
-  ovens.forEach((s,i)=>{const r=makeOven(s);r.group.position.set(x,ys[i],z+cd/2-0.01);scene.add(r.group);
-    register(r.group,s.meta,r.anims,{w:0.1,d:0.1});});
-}
+// ---- GROS ÉLECTROMÉNAGER (fond gauche) ----
+hangSign(-13,-9,3.4,signTex('ÉLECTROMÉNAGER',null,'#0c0d0f','#fff',RED),3.9);
+const subs=['us','combine','combine','simple'];
+for(let i=0;i<4;i++){const r=makeFridge(subs[i]);const b=BRANDS.gros[i%BRANDS.gros.length];const x=-17+i*1.8,z=-11.5;
+  r.group.position.set(x,r.h/2,z);scene.add(r.group);reg(r.group,{cat:'Réfrigération',name:b+' Réfrigérateur '+(subs[i]==='us'?'américain':subs[i]==='combine'?'combiné':'1 porte'),brand:b,priceTTC:rint(399,2199),energy:cls(),finish:r.fin,sw:'#c4c9cf',
+    specs:[['Type',subs[i]==='us'?'Américain':subs[i]==='combine'?'Combiné':'1 porte'],['Marque',b],['Finition',r.fin],['Froid','No Frost'],['Réf',code(b)]]},r.anims,r.foot,true);obstacle(x,z,r.foot.w+0.1,r.foot.d);prodCountEl.textContent=products.length;}
+for(let i=0;i<3;i++){const r=makeWasher();const b=BRANDS.gros[i%BRANDS.gros.length];const x=-9+i*1.4,z=-11.7;r.group.position.set(x,r.h/2,z);scene.add(r.group);
+  reg(r.group,{cat:'Lavage linge',name:b+' Lave-linge '+rint(8,11)+'kg',brand:b,priceTTC:rint(399,1099),energy:cls(),sw:'#f2f3f4',specs:[['Capacité',rint(8,11)+' kg'],['Essorage',rint(1200,1600)+' tr/min'],['Réf',code(b)]]},r.anims,r.foot,true);prodCountEl.textContent=products.length;}
+for(let i=0;i<3;i++){const r=makeDish();const b=BRANDS.gros[i%BRANDS.gros.length];const x=-4.5+i*1.4,z=-11.7;r.group.position.set(x,r.h/2,z);r.group.rotation.y=0;scene.add(r.group);
+  reg(r.group,{cat:'Lavage vaisselle',name:b+' Lave-vaisselle',brand:b,priceTTC:rint(399,990),energy:cls(),sw:'#c4c9cf',specs:[['Couverts',rint(12,15)+' couverts'],['Bruit',rint(39,46)+' dB'],['Réf',code(b)]]},r.anims,r.foot,true);prodCountEl.textContent=products.length;}
 
-/* ============================ GÉNÉRATION + PLACEMENT ============================ */
-let placedFridge=0;
-function fridgeSpec(){
-  const sub=['us','us','french','french','combine','combine','combine','side','1porte'][placedFridge%9];placedFridge++;
-  const brand=pick(['Samsung','LG','Whirlpool','Liebherr','Bosch','Beko','Haier','Electrolux','Hisense']);
-  const fin=pick(FIN);let w,h,d,cap,label;
-  if(sub==='us'||sub==='side'){w=0.91;h=1.78+rnd()*0.06;d=0.74;cap=rint(500,640)+' L';label='Réfrigérateur américain';}
-  else if(sub==='french'){w=0.91;h=1.82+rnd()*0.06;d=0.72;cap=rint(380,560)+' L';label='Multi-portes (French Door)';}
-  else if(sub==='combine'){w=0.60+rnd()*0.04;h=1.84+rnd()*0.1;d=0.66;cap=rint(280,360)+' L';label='Réfrigérateur combiné';}
-  else {w=0.55;h=1.40+rnd()*0.15;d=0.62;cap=rint(180,310)+' L';label='Réfrigérateur 1 porte';}
-  const c=cls(),price=rint(sub==='us'?1100:sub==='french'?900:sub==='combine'?550:320, sub==='us'?2400:sub==='french'?1900:1100);
-  const meta={cat:'Réfrigération',name:label,brand,price,energy:c,finish:fin,
-    specs:[['Type',label],['Marque',brand],['Finition',fin],['Dimensions',`${cm(h)}×${cm(w)}×${cm(d)} cm`],['Capacité',cap],['Froid',pick(['Froid ventilé No Frost','Froid brassé','Froid statique'])],['Référence',code(brand)]]};
-  return {sub,w,h,d,fin,meta};
-}
-function applianceSpec(cat){
-  const c=cls();
-  if(cat==='lv'){const brand=pick(['Bosch','Siemens','Whirlpool','Electrolux','Candy','Beko','Indesit']);const slim=rnd()<0.25;
-    const w=slim?0.45:0.60,h=0.84,d=0.60,fin=pick(FIN),cv=slim?rint(9,10):rint(13,15);
-    return {w,h,d,fin,meta:{cat:'Lavage vaisselle',name:'Lave-vaisselle '+(slim?'45 cm':'60 cm'),brand,price:rint(380,1100),energy:c,finish:fin,
-      specs:[['Type','Pose libre '+(slim?'45 cm':'60 cm')],['Marque',brand],['Finition',fin],['Dimensions',`${cm(h)}×${cm(w)}×${cm(d)} cm`],['Couverts',cv+' couverts'],['Niveau sonore',rint(39,46)+' dB'],['Référence',code(brand)]]}};}
-  if(cat==='ll'){const brand=pick(['Bosch','Samsung','LG','Electrolux','Beko','Candy','Whirlpool']);
-    const w=0.60,h=0.85,d=0.55+rnd()*0.1,fin=pick(['Blanc','Blanc','Inox']),kg=rint(7,11);
-    return {w,h,d,fin,meta:{cat:'Lavage linge',name:'Lave-linge hublot '+kg+' kg',brand,price:rint(380,1200),energy:c,finish:fin,
-      specs:[['Type','Frontal (hublot)'],['Marque',brand],['Finition',fin],['Dimensions',`${cm(h)}×${cm(w)}×${cm(d)} cm`],['Capacité',kg+' kg'],['Essorage',rint(1000,1600)+' tr/min'],['Référence',code(brand)]]}};}
-  if(cat==='plaque'){const brand=pick(['Bosch','Siemens','De Dietrich','Sauter','Electrolux','Brandt']);
-    const kind=pick(['Induction','Induction','Induction','Vitrocéramique','Gaz']);const zones=pick([3,4,4,5]);const w=zones>=5?0.80:0.58,d=0.50;
-    return {kind,zones,w,d,meta:{cat:'Cuisson',name:'Plaque '+kind,brand,price:rint(260,1300),energy:c,finish:kind==='Gaz'?'Inox':'Verre noir',
-      specs:[['Type',kind],['Marque',brand],['Foyers',zones+' foyers'],['Dimensions',`${cm(w)}×${cm(d)} cm`],['Commande',kind==='Gaz'?'Manettes':'Tactile'],['Référence',code(brand)]]}};}
-  if(cat==='four'){const brand=pick(['Bosch','Siemens','Whirlpool','Electrolux','De Dietrich','Candy','Brandt']);
-    const w=0.595,h=0.595,d=0.55,lit=rint(60,73),net=pick(['Pyrolyse','Catalyse','Pyrolyse','Hydrolyse']);
-    return {w,h,d,fin:'Inox',meta:{cat:'Cuisson — Four',name:'Four encastrable '+lit+' L',brand,price:rint(320,1400),energy:c,finish:'Inox',
-      specs:[['Type','Four multifonction'],['Marque',brand],['Volume',lit+' L'],['Dimensions',`${cm(h)}×${cm(w)}×${cm(d)} cm`],['Nettoyage',net],['Référence',code(brand)]]}};}
-  if(cat==='piano'){const brand=pick(['Smeg','Falcon','La Germania','Glem','Beko','Brandt']);
-    const w=0.90,d=0.65,foyers=pick([5,5,6]),lit=rint(90,130),fin=pick(['Inox','Noir','Inox']);
-    return {w,d,foyers,fin,meta:{cat:'Cuisson — Piano',name:'Piano de cuisson '+cm(w)+' cm',brand,price:rint(900,3200),energy:c,finish:fin,
-      specs:[['Type','Piano de cuisson'],['Marque',brand],['Foyers',foyers+' brûleurs gaz'],['Four',lit+' L'],['Largeur',cm(w)+' cm'],['Finition',fin],['Référence',code(brand)]]}};}
-}
+// ---- CAISSE (front droite) ----
+counter(11,12.5,4,0);
+const caisseSign=new THREE.Mesh(B(2.4,0.55,0.05),new THREE.MeshBasicMaterial({map:signTex('CAISSE',null,RED,'#fff')}));caisseSign.position.set(11,2.9,12.5);scene.add(caisseSign);
+for(const dx of[-1.2,1.2]){scene.add(M(B(0.32,0.22,0.28),MAT.pBlack,11+dx,1.1,12.5));scene.add(M(B(0.3,0.2,0.01),MAT.screenOff,11+dx,1.12,12.36));
+  scene.add(M(B(0.14,0.18,0.12),MAT.pDark,11+dx+0.25,1.05,12.55));} // TPE
 
-// --- Réfrigérateurs (20) ---
-function placeFridge(x,z,ry){const s=fridgeSpec();const r=makeFridge(s);r.group.position.set(x,s.h/2,z);r.group.rotation.y=ry;scene.add(r.group);register(r.group,s.meta,r.anims,r.foot);plinth(x,z,s.w+0.1,s.d+0.1);}
-for(let i=0;i<7;i++)placeFridge(-HW+0.6,-8+i*2.6,Math.PI/2);     // mur gauche
-for(let i=0;i<7;i++)placeFridge( HW-0.6,-8+i*2.6,-Math.PI/2);    // mur droit
-for(let i=0;i<6;i++)placeFridge(-7.5+i*3,-9.2,0);                // rangée fond
+// ---- PUBS infinity / Club+ ----
+hangSign(4,7.5,3.4,signTex('infinity',"Réparé ou remplacé",RED,'#fff','#fff'),3.7);
+hangSign(-4,-2,3.4,signTex('CLUB +',"Avantages fidélité",'#0c0d0f','#fff',RED),3.7);
+function wallPub(x,z,ry,tex){const m=new THREE.Mesh(B(3.4,1.7,0.08),new THREE.MeshBasicMaterial({map:tex}));m.position.set(x,2.4,z);m.rotation.y=ry;scene.add(m);}
+wallPub(-HW+0.2,5,Math.PI/2,signTex('infinity',"La sérénité incluse",RED,'#fff','#fff'));
+wallPub(HW-0.2,-3,-Math.PI/2,signTex('CLUB +',"Adhésion gratuite",'#0c0d0f','#fff',RED));
+// totem entrée
+scene.add(M(B(1,2.4,0.15),MAT.pBlack,-3,1.2,12));const totem=new THREE.Mesh(B(0.9,2.2,0.05),adMat);totem.position.set(-3,1.2,12.08);scene.add(totem);
 
-// --- Lave-linge (15) : zone gauche-centre, 3 rangées de 5 ---
-for(let r=0;r<3;r++)for(let c=0;c<5;c++){const s=applianceSpec('ll');const o=makeWasher(s);
-  const x=-12.5+c*1.5,z=-2+r*2.4;o.group.position.set(x,s.h/2,z);scene.add(o.group);register(o.group,s.meta,o.anims,o.foot);plinth(x,z,s.w+0.06,s.d+0.06);}
+// cadre sélection sol
+const sel=new THREE.LineSegments(new THREE.EdgesGeometry(B(1,1,1)),new THREE.LineBasicMaterial({color:RED}));sel.visible=false;scene.add(sel);
 
-// --- Lave-vaisselle (15) : zone droite-centre, 3 rangées de 5 ---
-for(let r=0;r<3;r++)for(let c=0;c<5;c++){const s=applianceSpec('lv');const o=makeDishwasher(s);
-  const x=12.5-c*1.5,z=-2+r*2.4;o.group.position.set(x,s.h/2,z);o.group.rotation.y=Math.PI;scene.add(o.group);register(o.group,s.meta,o.anims,o.foot);plinth(x,z,s.w+0.06,s.d+0.06);}
-
-// --- Fours (15) : mur du fond, 5 colonnes de 3 ---
-for(let c=0;c<5;c++){const x=-10+c*5;ovenColumn(x,[applianceSpec('four'),applianceSpec('four'),applianceSpec('four')]);}
-
-// --- Plaques (15) : 2 gondoles centrales ---
-let plaqueN=0;
-function fillGondola(gx,gz,len,n){const g=gondola(gx,gz,len);for(let i=0;i<n;i++){const s=applianceSpec('plaque');const o=makeCooktop(s);
-  const z=gz-len/2+len*(i+0.5)/n;o.group.position.set(gx,g.top,z);scene.add(o.group);register(o.group,s.meta,o.anims,{w:0.1,d:0.1});plaqueN++;}}
-fillGondola(-2.5,1,8,8); fillGondola(2.5,1,7,7);
-
-// --- Pianos (8) : rangée vitrine à l'avant ---
-for(let i=0;i<8;i++){const s=applianceSpec('piano');const o=makePiano(s);
-  const x=-10.5+i*3;o.group.position.set(x,0.45,8);scene.add(o.group);register(o.group,s.meta,o.anims,o.foot);plinth(x,8,s.w+0.1,s.d+0.1);}
-
-// Cadre de sélection (au sol)
-const selFrame=new THREE.LineSegments(new THREE.EdgesGeometry(B(1,1,1)),new THREE.LineBasicMaterial({color:'#e11d2a'}));
-selFrame.visible=false;scene.add(selFrame);
-
-/* ============================ JOUEUR / CONTRÔLES ============================ */
-const player={pos:new THREE.Vector3(0,1.65,HD-2),vel:new THREE.Vector3(),yaw:0,pitch:0,radius:0.38};
-const keys={};let locked=false,started=false;
-const SPEED=4.4,ACCEL=16,DAMP=11,SENS=0.0022;
-addEventListener('keydown',e=>keys[e.code]=true);addEventListener('keyup',e=>keys[e.code]=false);
-renderer.domElement.addEventListener('click',()=>{if(started&&!isMobile&&!locked)renderer.domElement.requestPointerLock();});
+/* ===================== CONTRÔLES ===================== */
+const player={pos:new THREE.Vector3(0,1.65,HD-3),vel:new THREE.Vector3(),yaw:0,pitch:0,radius:0.38};
+const keys={};let locked=false,started=false,uiOpen=false;
+const SPEED=4.6,ACCEL=16,DAMP=11,SENS=.0022;
+addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyP'&&started){e.preventDefault();toggleCart();}});
+addEventListener('keyup',e=>keys[e.code]=false);
+renderer.domElement.addEventListener('click',()=>{if(started&&!isMobile&&!locked&&!uiOpen)renderer.domElement.requestPointerLock();});
 document.addEventListener('pointerlockchange',()=>locked=document.pointerLockElement===renderer.domElement);
-document.addEventListener('mousemove',e=>{if(!locked)return;player.yaw-=e.movementX*SENS;player.pitch-=e.movementY*SENS;player.pitch=Math.max(-1.4,Math.min(1.4,player.pitch));});
-renderer.domElement.addEventListener('mousedown',()=>{if(locked)raycastFrom(0,0);});
+document.addEventListener('mousemove',e=>{if(!locked)return;player.yaw-=e.movementX*SENS;player.pitch=Math.max(-1.4,Math.min(1.4,player.pitch-e.movementY*SENS));});
+renderer.domElement.addEventListener('mousedown',()=>{if(locked)cast(0,0);});
 
-const joy={active:false,id:null,cx:0,cy:0,dx:0,dy:0};
-const joyEl=document.getElementById('joy'),joyNub=document.getElementById('joyNub');
+const joy={active:false,id:null,cx:0,cy:0,dx:0,dy:0},joyEl=document.getElementById('joy'),joyNub=document.getElementById('joyNub');
 const look={active:false,id:null,lx:0,ly:0,moved:0,sx:0,sy:0,t:0};
 function tStart(e){for(const t of e.changedTouches){const r=joyEl.getBoundingClientRect();
-  if(t.clientX>=r.left-20&&t.clientX<=r.right+20&&t.clientY>=r.top-20&&t.clientY<=r.bottom+20&&!joy.active){joy.active=true;joy.id=t.identifier;joy.cx=r.left+r.width/2;joy.cy=r.top+r.height/2;jUpd(t.clientX,t.clientY);}
+  if(t.clientX>=r.left-20&&t.clientX<=r.right+20&&t.clientY>=r.top-20&&t.clientY<=r.bottom+20&&!joy.active){joy.active=true;joy.id=t.identifier;joy.cx=r.left+r.width/2;joy.cy=r.top+r.height/2;jU(t.clientX,t.clientY);}
   else if(!look.active){look.active=true;look.id=t.identifier;look.lx=look.sx=t.clientX;look.ly=look.sy=t.clientY;look.moved=0;look.t=performance.now();}}}
-function tMove(e){for(const t of e.changedTouches){if(joy.active&&t.identifier===joy.id)jUpd(t.clientX,t.clientY);
-  else if(look.active&&t.identifier===look.id){const dx=t.clientX-look.lx,dy=t.clientY-look.ly;player.yaw-=dx*0.005;player.pitch=Math.max(-1.4,Math.min(1.4,player.pitch-dy*0.005));look.lx=t.clientX;look.ly=t.clientY;look.moved+=Math.abs(dx)+Math.abs(dy);}}e.preventDefault();}
+function tMove(e){for(const t of e.changedTouches){if(joy.active&&t.identifier===joy.id)jU(t.clientX,t.clientY);
+  else if(look.active&&t.identifier===look.id){const dx=t.clientX-look.lx,dy=t.clientY-look.ly;player.yaw-=dx*.005;player.pitch=Math.max(-1.4,Math.min(1.4,player.pitch-dy*.005));look.lx=t.clientX;look.ly=t.clientY;look.moved+=Math.abs(dx)+Math.abs(dy);}}if(e.target===renderer.domElement)e.preventDefault();}
 function tEnd(e){for(const t of e.changedTouches){if(joy.active&&t.identifier===joy.id){joy.active=false;joy.dx=joy.dy=0;joyNub.style.transform='translate(0,0)';}
-  else if(look.active&&t.identifier===look.id){look.active=false;if(look.moved<12&&performance.now()-look.t<350)raycastFrom((look.sx/innerWidth)*2-1,-(look.sy/innerHeight)*2+1);}}}
-function jUpd(px,py){let dx=px-joy.cx,dy=py-joy.cy;const max=44,d=Math.hypot(dx,dy);if(d>max){dx=dx/d*max;dy=dy/d*max;}joy.dx=dx/max;joy.dy=dy/max;joyNub.style.transform=`translate(${dx}px,${dy}px)`;}
+  else if(look.active&&t.identifier===look.id){look.active=false;if(look.moved<12&&performance.now()-look.t<350)cast((look.sx/innerWidth)*2-1,-(look.sy/innerHeight)*2+1);}}}
+function jU(px,py){let dx=px-joy.cx,dy=py-joy.cy;const m=44,d=Math.hypot(dx,dy);if(d>m){dx=dx/d*m;dy=dy/d*m;}joy.dx=dx/m;joy.dy=dy/m;joyNub.style.transform=`translate(${dx}px,${dy}px)`;}
 addEventListener('touchstart',tStart,{passive:false});addEventListener('touchmove',tMove,{passive:false});addEventListener('touchend',tEnd);addEventListener('touchcancel',tEnd);
 
-/* ============================ RAYCAST / FICHE ============================ */
-const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
-let selected=null,quoteN=0;const seen=new Set();
-function raycastFrom(nx,ny){ndc.set(nx,ny);ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(interactables,false);
-  if(h.length&&h[0].distance<7)selectAppliance(h[0].object.userData.appliance);}
+/* ===================== RAYCAST / FICHE ===================== */
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();let selected=null;
+function cast(nx,ny){ndc.set(nx,ny);ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(interactables,false);if(h.length&&h[0].distance<8)select(h[0].object.userData.prod);}
+function select(a){if(!a)return;if(selected&&selected!==a)selected.open=false;selected=a;if(a.anims.length)a.open=true;
+  sel.visible=true;sel.position.set(a.group.position.x,.02,a.group.position.z);sel.scale.set(Math.max(a.foot.w,0.5)*0.95,.001,Math.max(a.foot.d,0.5)*0.75);
+  showCard(a);if(!isMobile&&locked)document.exitPointerLock();}
+const $=id=>document.getElementById(id);
+function showCard(a){const m=a.meta;uiOpen=true;
+  $('cardCat').textContent=m.cat;$('cardName').textContent=m.name;$('cardBrand').textContent=m.brand;
+  $('cardPrice').innerHTML=m.priceTTC.toLocaleString('fr-FR')+' € <small>TTC</small>';
+  $('cardEnergy').innerHTML=m.energy?`<b style="background:${ENERGY[m.energy]}">${m.energy}</b> Classe énergétique`:'';
+  $('cardSpecs').innerHTML=m.specs.map(([k,v])=>`<div class="row"><span>${k}</span><span>${v}</span></div>`).join('');
+  const ob=$('cardOpen');if(a.anims.length){ob.disabled=false;ob.classList.add('act');ob.textContent='Fermer';}else{ob.disabled=true;ob.classList.remove('act');ob.textContent='Pas d\'ouverture';}
+  const ad2=$('cardAdd');ad2.textContent='Ajouter au panier';ad2.classList.remove('done');
+  $('cart').classList.remove('open');$('card').classList.add('open');}
+$('cardClose').onclick=()=>{$('card').classList.remove('open');if(selected)selected.open=false;sel.visible=false;selected=null;uiOpen=false;};
+$('cardOpen').onclick=function(){if(!selected||!selected.anims.length)return;selected.open=!selected.open;this.textContent=selected.open?'Fermer':'Ouvrir';};
+$('cardAdd').onclick=function(){if(!selected)return;addToCart(selected.meta);this.textContent='✓ Ajouté';this.classList.add('done');};
 
-function selectAppliance(a){
-  if(!a)return;
-  if(selected&&selected!==a)selected.open=false;
-  selected=a;
-  if(a.anims.length)a.open=true;          // ouverture auto pour voir l'intérieur
-  seen.add(a);document.getElementById('seen').textContent=seen.size;
-  const p=a.group.position,f=a.foot;
-  selFrame.visible=true;selFrame.position.set(p.x,0.02,p.z);selFrame.scale.set(f.w*0.9,0.001,f.d*0.7);
-  showCard(a);
-}
-const cardEl=document.getElementById('card');
-function showCard(a){const m=a.meta;
-  document.getElementById('cardCat').textContent=m.cat;
-  document.getElementById('cardName').textContent=m.name;
-  document.getElementById('cardBrand').textContent=m.brand;
-  document.getElementById('cardPrice').innerHTML=m.price.toLocaleString('fr-FR')+' '+CONFIG.currency+' <small>HT</small>';
-  document.getElementById('cardEnergy').innerHTML=`<b style="background:${ENERGY[m.energy]}">${m.energy}</b> Classe énergétique`;
-  document.getElementById('cardSpecs').innerHTML=m.specs.map(([k,v])=>`<div class="row"><span>${k}</span><span>${v}</span></div>`).join('');
-  const ob=document.getElementById('cardOpen');
-  if(a.anims.length){ob.disabled=false;ob.textContent='Fermer les portes';ob.classList.add('act');}
-  else{ob.disabled=true;ob.textContent='Pas de porte sur cet article';ob.classList.remove('act');}
-  const add=document.getElementById('cardAdd');add.textContent='Ajouter au devis';add.classList.remove('done');
-  cardEl.classList.add('open');
-}
-document.getElementById('cardClose').onclick=()=>{cardEl.classList.remove('open');if(selected)selected.open=false;selFrame.visible=false;selected=null;};
-document.getElementById('cardOpen').onclick=function(){if(!selected||!selected.anims.length)return;selected.open=!selected.open;
-  this.textContent=selected.open?'Fermer les portes':'Ouvrir les portes';this.classList.toggle('act',selected.open);};
-document.getElementById('cardAdd').onclick=function(){quoteN++;document.getElementById('quoteCount').textContent=quoteN;this.textContent='✓ Ajouté au devis';this.classList.add('done');};
+/* ===================== PANIER / PAIEMENT ===================== */
+const cart=[];
+function addToCart(m){const e=cart.find(i=>i.id===m.id);if(e)e.qty++;else cart.push({id:m.id,name:m.name,price:m.priceTTC,qty:1,sw:m.sw||'#1b1c1e'});renderCart();}
+function cartCount(){return cart.reduce((s,i)=>s+i.qty,0);}
+function cartTotal(){return cart.reduce((s,i)=>s+i.price*i.qty,0);}
+function renderCart(){$('cartCount').textContent=cartCount();
+  const body=$('cartBody');if(!cart.length){body.innerHTML='<div class="cart-empty">Votre panier est vide.<br>Cliquez un produit pour l\'ajouter.</div>';}
+  else body.innerHTML=cart.map((i,n)=>`<div class="citem"><div class="sw" style="background:${i.sw}"></div><div class="info"><div class="n">${i.name}</div><div class="p">${i.price.toLocaleString('fr-FR')} € TTC</div></div>
+    <div class="qty"><button data-m="${n}">−</button><span>${i.qty}</span><button data-p="${n}">+</button></div><div class="rm" data-r="${n}">✕</div></div>`).join('');
+  $('cartTotal').innerHTML=cartTotal().toLocaleString('fr-FR')+' € <small>TTC</small>';
+  body.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{cart[b.dataset.p].qty++;renderCart();});
+  body.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const i=cart[b.dataset.m];if(--i.qty<=0)cart.splice(b.dataset.m,1);renderCart();});
+  body.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{cart.splice(b.dataset.r,1);renderCart();});}
+function toggleCart(){const c=$('cart');if(c.classList.contains('open')){c.classList.remove('open');uiOpen=false;}
+  else{$('card').classList.remove('open');c.classList.add('open');uiOpen=true;if(!isMobile&&locked)document.exitPointerLock();renderCart();}}
+$('cartBtn').onclick=toggleCart;$('cartClose').onclick=()=>{$('cart').classList.remove('open');uiOpen=false;};
 
-/* ============================ BOUCLE ============================ */
-const clock=new THREE.Clock();
-const fwd=new THREE.Vector3(),right=new THREE.Vector3(),up=new THREE.Vector3(0,1,0),mv=new THREE.Vector3();
-const crossEl=document.getElementById('cross'),posEl=document.getElementById('pos');
-const smooth=t=>t*t*(3-2*t);let frame=0;
+const payEl=$('pay'),payBox=$('payBox');
+function openPay(){if(!cart.length)return;uiOpen=true;payEl.classList.add('open');payForm();}
+function payForm(){payBox.innerHTML=`<div class="blogo logo" style="font-size:24px">boulanger</div><h4>Paiement sécurisé</h4><div class="sub">Carte bancaire</div>
+  <div class="pay-total">${cartTotal().toLocaleString('fr-FR')} € <small>TTC</small></div>
+  <div class="field"><label>Numéro de carte</label><input id="pcc" value="4970 •••• •••• 1234" inputmode="numeric"></div>
+  <div class="field row2"><div style="flex:1"><label>Expiration</label><input id="pex" value="12/29"></div><div style="flex:1"><label>CVV</label><input id="pcv" value="•••"></div></div>
+  <button class="btn-red" id="payNow">Payer ${cartTotal().toLocaleString('fr-FR')} €</button>
+  <button class="btn-ghost" id="payCancel" style="margin-top:10px">Annuler</button>`;
+  $('payNow').onclick=payProcess;$('payCancel').onclick=closePay;}
+function payProcess(){payBox.innerHTML=`<div class="blogo logo" style="font-size:24px">boulanger</div><div class="spinner"></div><h4>Paiement en cours…</h4><div class="sub">Ne fermez pas la fenêtre</div>`;
+  setTimeout(()=>{const ref='BLG-'+rint(100000,999999);const total=cartTotal();
+    payBox.innerHTML=`<div class="pay-ok">✓</div><h4>Paiement accepté</h4><div class="sub">Commande ${ref}</div>
+      <div class="pay-total">${total.toLocaleString('fr-FR')} € <small>TTC</small></div>
+      <div style="font-size:12px;color:var(--z4);line-height:1.7;margin-bottom:20px">Merci pour votre achat. Un e-mail de confirmation et votre couverture <b style="color:#fff">infinity</b> vous sont envoyés.</div>
+      <button class="btn-red" id="payDone">Continuer mes achats</button>`;
+    cart.length=0;renderCart();$('payDone').onclick=closePay;},1700);}
+function closePay(){payEl.classList.remove('open');$('cart').classList.remove('open');uiOpen=false;}
+$('payBtn').onclick=openPay;
+renderCart();
 
-function collide(){const r=player.radius;
-  player.pos.x=Math.max(-HW+r,Math.min(HW-r,player.pos.x));
-  player.pos.z=Math.max(-HD+r,Math.min(HD-r,player.pos.z));
-  for(const o of obstacles){const a=o.minX-r,b=o.maxX+r,c=o.minZ-r,d=o.maxZ+r;
-    if(player.pos.x>a&&player.pos.x<b&&player.pos.z>c&&player.pos.z<d){
-      const dL=player.pos.x-a,dR=b-player.pos.x,dB=player.pos.z-c,dT=d-player.pos.z,mn=Math.min(dL,dR,dB,dT);
-      if(mn===dL)player.pos.x=a;else if(mn===dR)player.pos.x=b;else if(mn===dB)player.pos.z=c;else player.pos.z=d;}}}
+/* ===================== ZONE LABEL ===================== */
+const zones=[{x:-10,z:10,n:'Téléphonie'},{x:-13.5,z:4,n:'Informatique'},{x:12,z:8,n:'Son'},{x:0,z:-11,n:'Télévision'},{x:0,z:4.5,n:'Petit électroménager'},{x:-12,z:-11,n:'Gros électroménager'},{x:11,z:12,n:'Caisse'}];
+let curZone='';const zoneEl=$('zoneLabel');
+function updateZone(){let best=null,bd=1e9;for(const z of zones){const d=(z.x-player.pos.x)**2+(z.z-player.pos.z)**2;if(d<bd){bd=d;best=z;}}
+  const n=bd<36?best.n:'';if(n!==curZone){curZone=n;zoneEl.textContent=n;zoneEl.classList.toggle('show',!!n);}}
 
-function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),0.05);frame++;
-  camera.rotation.set(player.pitch,player.yaw,0,'YXZ');
-  camera.getWorldDirection(fwd);fwd.y=0;fwd.normalize();right.crossVectors(fwd,up).normalize();
+/* ===================== BOUCLE ===================== */
+const clock=new THREE.Clock();const fwd=new THREE.Vector3(),right=new THREE.Vector3(),up=new THREE.Vector3(0,1,0),mv=new THREE.Vector3();
+const crossEl=$('cross'),posEl=$('pos');const smooth=t=>t*t*(3-2*t);let frame=0,doorOpen=0;
+function collide(){const r=player.radius;player.pos.x=Math.max(-HW+r,Math.min(HW-r,player.pos.x));player.pos.z=Math.max(-HD+r,Math.min(HD-r,player.pos.z));
+  for(const o of obstacles){const a=o.minX-r,b=o.maxX+r,c=o.minZ-r,d=o.maxZ+r;if(player.pos.x>a&&player.pos.x<b&&player.pos.z>c&&player.pos.z<d){
+    const dL=player.pos.x-a,dR=b-player.pos.x,dB=player.pos.z-c,dT=d-player.pos.z,mn=Math.min(dL,dR,dB,dT);
+    if(mn===dL)player.pos.x=a;else if(mn===dR)player.pos.x=b;else if(mn===dB)player.pos.z=c;else player.pos.z=d;}}}
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05);frame++;
+  camera.rotation.set(player.pitch,player.yaw,0,'YXZ');camera.getWorldDirection(fwd);fwd.y=0;fwd.normalize();right.crossVectors(fwd,up).normalize();
   mv.set(0,0,0);
-  if(started){
-    if(keys['KeyW']||keys['KeyZ']||keys['ArrowUp'])mv.add(fwd);
-    if(keys['KeyS']||keys['ArrowDown'])mv.sub(fwd);
-    if(keys['KeyD']||keys['ArrowRight'])mv.add(right);
-    if(keys['KeyA']||keys['KeyQ']||keys['ArrowLeft'])mv.sub(right);
-    if(joy.active){mv.addScaledVector(fwd,-joy.dy);mv.addScaledVector(right,joy.dx);}
-  }
+  if(started&&!uiOpen){if(keys['KeyW']||keys['KeyZ']||keys['ArrowUp'])mv.add(fwd);if(keys['KeyS']||keys['ArrowDown'])mv.sub(fwd);if(keys['KeyD']||keys['ArrowRight'])mv.add(right);if(keys['KeyA']||keys['KeyQ']||keys['ArrowLeft'])mv.sub(right);if(joy.active){mv.addScaledVector(fwd,-joy.dy);mv.addScaledVector(right,joy.dx);}}
   if(mv.lengthSq()>0)mv.normalize();
-  player.vel.addScaledVector(mv,ACCEL*dt);player.vel.multiplyScalar(Math.max(0,1-DAMP*dt));
-  if(player.vel.length()>SPEED)player.vel.setLength(SPEED);
+  player.vel.addScaledVector(mv,ACCEL*dt);player.vel.multiplyScalar(Math.max(0,1-DAMP*dt));if(player.vel.length()>SPEED)player.vel.setLength(SPEED);
   player.pos.addScaledVector(player.vel,dt);collide();camera.position.copy(player.pos);
-
-  // animation des portes
-  for(const a of appliances){const tg=a.open?1:0;if(a.t!==tg){a.t+=Math.sign(tg-a.t)*Math.min(Math.abs(tg-a.t),dt*2.4);
-    const e=smooth(a.t);for(const an of a.anims){if(an.kind==='rotate')an.target.rotation[an.axis]=an.from+(an.to-an.from)*e;else an.target.position[an.axis]=an.from+(an.to-an.from)*e;}}}
-
-  // visée (throttle)
-  if(locked&&frame%5===0){ray.setFromCamera({x:0,y:0},camera);const h=ray.intersectObjects(interactables,false);crossEl.classList.toggle('aim',h.length&&h[0].distance<7);}
-
-  posEl.innerHTML=`<span>${player.pos.x.toFixed(1)}</span> / <span>${player.pos.z.toFixed(1)}</span>`;
-  renderer.render(scene,camera);
-}
+  // portes auto
+  const near=Math.hypot(player.pos.x-0,player.pos.z-(HD-0.5))<4.5;doorOpen+=((near?1:0)-doorOpen)*Math.min(1,dt*4);
+  for(const p of dPanels)p.g.position.x=p.side*doorOpen*1.9;
+  // portes produits
+  for(const a of products){const tg=a.open?1:0;if(a.t!==tg){a.t+=Math.sign(tg-a.t)*Math.min(Math.abs(tg-a.t),dt*2.4);const e=smooth(a.t);for(const an of a.anims){if(an.kind==='rotate')an.target.rotation[an.axis]=an.from+(an.to-an.from)*e;else an.target.position[an.axis]=an.from+(an.to-an.from)*e;}}}
+  // pub TV
+  if(frame%2===0)drawAd(performance.now()/1000);
+  if(locked&&frame%5===0){ray.setFromCamera({x:0,y:0},camera);const h=ray.intersectObjects(interactables,false);crossEl.classList.toggle('aim',h.length&&h[0].distance<8);}
+  if(frame%10===0){posEl.innerHTML=`<span>${player.pos.x.toFixed(0)}</span> / <span>${player.pos.z.toFixed(0)}</span>`;updateZone();}
+  renderer.render(scene,camera);}
 animate();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 
-/* ============================ DÉMARRAGE ============================ */
-document.querySelector('#storeName').childNodes[0].textContent='PRO';
-let prog=0;const bar=document.querySelector('#loadbar i'),hint=document.getElementById('startHint');
-const li=setInterval(()=>{prog=Math.min(100,prog+16+Math.random()*22);bar.style.width=prog+'%';
-  if(prog>=100){clearInterval(li);hint.textContent=isMobile?'Joystick pour avancer · glisser pour regarder · toucher un appareil':'Cliquez pour commencer la visite';}},110);
-document.getElementById('enter').addEventListener('click',()=>{started=true;
-  document.getElementById('start').classList.add('hide');document.getElementById('hud').classList.add('show');
-  if(isMobile){document.getElementById('touch').classList.add('on');crossEl.style.display='none';}else renderer.domElement.requestPointerLock();});
+/* ===================== START ===================== */
+let prog=0;const bar=document.querySelector('#loadbar i'),hint=$('startHint');
+const li=setInterval(()=>{prog=Math.min(100,prog+15+Math.random()*22);bar.style.width=prog+'%';if(prog>=100){clearInterval(li);hint.textContent=isMobile?'Joystick pour avancer · glisser pour regarder · toucher un produit':'Cliquez pour commencer la visite';}},100);
+$('enter').onclick=()=>{started=true;$('start').classList.add('hide');$('hud').classList.add('show');if(isMobile){$('touch').classList.add('on');crossEl.style.display='none';}else renderer.domElement.requestPointerLock();};
+addEventListener('keydown',e=>{if(e.code==='Escape'){$('card').classList.remove('open');$('cart').classList.remove('open');closePay();if(selected)selected.open=false;sel.visible=false;selected=null;uiOpen=false;}});
 </script>
 </body>
 </html>
