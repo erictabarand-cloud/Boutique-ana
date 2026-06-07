@@ -60,7 +60,7 @@
 <div id="top">
   <div class="logo" style="font-size:16px">boulanger</div>
   <div class="seg" id="modeSeg"><button data-m="edit" class="on">Édition</button><button data-m="visit">Visite</button></div>
-  <div class="grp" id="editTools"><button class="tbtn on" id="btnGrid">Grille</button><button class="tbtn on" id="btnSnap">Aimant</button><button class="tbtn on" id="btnTags">Prix</button><button class="tbtn" id="btnTop">Dessus</button><button class="tbtn" id="btnExport">Exporter</button><button class="tbtn" id="btnImport">Importer</button><button class="tbtn" id="btnClear">Vider</button></div>
+  <div class="grp" id="editTools"><button class="tbtn on" id="btnGrid">Grille</button><button class="tbtn on" id="btnSnap">Aimant</button><button class="tbtn on" id="btnTags">Prix</button><button class="tbtn" id="btnTop">Dessus</button><button class="tbtn" id="btnExport">Exporter</button><button class="tbtn" id="btnImport">Importer</button><button class="tbtn" id="btnClear">Vider</button><button class="tbtn" id="btnAuto" title="Remplissage automatique (test réversible)">Test auto</button></div>
 </div>
 <div id="palette"><h4>Bibliothèque</h4><div class="find"><input id="palFind" placeholder="Rechercher…"></div><div class="scroll" id="palScroll"></div></div>
 <div id="colors"><span class="lab">Coloris</span><div id="swatches" style="display:flex;gap:8px"></div></div>
@@ -491,11 +491,40 @@ $('btnSnap').onclick=function(){snapOn=!snapOn;this.classList.toggle('on',snapOn
 $('btnTags').onclick=function(){showTags=!showTags;this.classList.toggle('on',showTags);priceTags.forEach(t=>t.visible=showTags);};
 $('btnTop').onclick=()=>{orbit.polar=.2;orbit.az=Math.PI;orbit.dist=36;orbit.target.set(0,0,0);camLerp=1;applyOrbit();refreshSlots();};
 $('btnClear').onclick=()=>{if(confirm('Vider tout le magasin ?'))clearAll();};
+$('btnAuto').onclick=function(){if(!autoFillOn){userBackup=serialize();autoFillOn=true;this.classList.add('on');clearAll();autoFillStore();}else{autoFillOn=false;this.classList.remove('on');loadLayout(userBackup||[]);save();}};
 $('btnExport').onclick=()=>{const arr=objects.filter(o=>!o.parent).map(o=>({t:o.type,x:o.x,z:o.z,ry:o.ry,h:o.h,c:o.color,sh:o.shelves,ch:Object.keys(o.occ).map(k=>({t:o.occ[k].type,i:+k,c:o.occ[k].color}))}));const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(arr)],{type:'application/json'}));a.download='magasin-boulanger.json';a.click();};
 $('btnImport').onclick=()=>$('importFile').click();
 $('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{loadLayout(JSON.parse(rd.result));}catch(err){alert('Fichier invalide');}};rd.readAsText(f);};
 function loadLayout(arr){clearAll();for(const o of arr){if(!T[o.t])continue;const disp=addFloor(o.t,o.x,o.z,o.ry||0,o.h||0,o.c);if(o.sh&&disp.shelves!=null&&o.sh!==disp.shelves){while(disp.shelves<o.sh){selected=disp;changeShelves(1);}while(disp.shelves>o.sh){selected=disp;changeShelves(-1);}}if(o.ch)for(const ch of o.ch)if(T[ch.t]&&disp.slots&&disp.slots[ch.i])addToSlot(ch.t,disp,ch.i,ch.c);}deselect();}
-function save(){try{const arr=objects.filter(o=>!o.parent).map(o=>({t:o.type,x:o.x,z:o.z,ry:o.ry,h:o.h,c:o.color,sh:o.shelves,ch:Object.keys(o.occ).map(k=>({t:o.occ[k].type,i:+k,c:o.occ[k].color}))}));localStorage.setItem('boulanger_pro_v3',JSON.stringify(arr));}catch(e){}}
+let autoFillOn=false,userBackup=null;
+function serialize(){return objects.filter(o=>!o.parent).map(o=>({t:o.type,x:o.x,z:o.z,ry:o.ry,h:o.h,c:o.color,sh:o.shelves,ch:Object.keys(o.occ).map(k=>({t:o.occ[k].type,i:+k,c:o.occ[k].color}))}));}
+function save(){if(autoFillOn)return;try{localStorage.setItem('boulanger_pro_v3',JSON.stringify(serialize()));}catch(e){}}
+function colorPick(t){const c=colorsOf(t);return c?c[Math.floor(Math.random()*c.length)][1]:null;}
+function fillDisp(d,types){let ti=0;for(let i=0;i<d.slots.length;i++){if(d.occ[i])continue;const acc=d.slots[i].acc||CONS;let t=null;for(let k=0;k<types.length;k++){const cand=types[(ti+k)%types.length];if(T[cand]&&acc.includes(T[cand].sc)){t=cand;ti+=k+1;break;}}if(t)addToSlot(t,d,i,colorPick(t));}}
+function autoFillStore(){
+  let x=-20;['fridgeUS','fridgeCombine','fridge1','caveVin','washer','secheLinge','dishF'].forEach(t=>{addFloor(t,x,-13,0,0,colorPick(t));x+=1.7;});
+  ['chestS','chestM','chestL'].forEach((t,i)=>addFloor(t,-20+i*1.8,-10,0,0,'#f2f3f4'));
+  const ow1=addFloor('ovenWall12',-7,-13.5,0,0);fillDisp(ow1,['ovenBuiltin','fourVapeur','microBuiltin']);
+  const ow2=addFloor('ovenWall3',-3.2,-13.5,0,0);fillDisp(ow2,['ovenBuiltin']);
+  for(let i=0;i<3;i++){const mc=addFloor('meubleCuisine',8.5+i*.72,-13.5,0,0);addToSlot('plaqueInduction',mc,0);addToSlot('lvEncastrable',mc,1);}
+  let tx=1;[77,65,55,50].forEach(d=>{const tu=addFloor('tvUnit',tx,-13,0,0);addToSlot('tv'+d,tu,0);addToSlot('soundbar',tu,1,colorPick('soundbar'));tx+=2.7;});
+  const g1=addFloor('gondolaHigh',-5,3,0,0);fillDisp(g1,['cafe','broyeur','bouilloire','blender','friteuse','grillepain','robotCuiseur','gaufrier','microP','fer']);
+  const g2=addFloor('gondolaHigh',-3.5,3,0,0);fillDisp(g2,['robotCuiseur','blender','friteuse','cafe','broyeur','grillepain','gaufrier','bouilloire','microP','fer']);
+  const gl=addFloor('gondolaLow',-5,7,0,0);fillDisp(gl,['friteuse','bouilloire','grillepain','blender']);
+  const ga=addFloor('gondolaAcc',0,6,0,0);fillDisp(ga,['coque','cable','chargeur','souris','clavier','cle','support','protection','batterie','casqueFil']);
+  const at1=addFloor('appleTotem',4,6,0,0);addToSlot('laptop',at1,0,colorPick('laptop'));addToSlot('imac',at1,1,colorPick('imac'));addToSlot('phone',at1,2,colorPick('phone'));
+  const at2=addFloor('appleTotem',7,6,0,0);addToSlot('tablet',at2,0,colorPick('tablet'));addToSlot('phonePro',at2,1,colorPick('phonePro'));addToSlot('laptopGamer',at2,2,colorPick('laptopGamer'));
+  const tph=addFloor('tableExpo',-10,8,0,0);fillDisp(tph,['phone','phonePro','phoneMax','phonePliable','phoneCompact','montre','montreSport','earbuds','powerbank','liseuse']);
+  const tin=addFloor('tableExpo',-10,11,0,0);fillDisp(tin,['laptop','laptopGamer','ultrabook','monitor','monitorGamer','pcDesk','imprimante','tablet','tabletPro','imac']);
+  const gson=addFloor('gondolaHigh',12,3,0,0);fillDisp(gson,['speakerC','headphones','soundbar','speakerT']);
+  addFloor('speakerT',12,6,0,0,colorPick('speakerT'));addFloor('speakerT',12.6,6,0,0,colorPick('speakerT'));
+  const dy1=addFloor('dysonStand',14,6,0,0);addToSlot('dysonFan',dy1,0);addToSlot('dysonStick',dy1,1);
+  const dy2=addFloor('dysonStand',16,6,0,0);addToSlot('dysonHand',dy2,0);addToSlot('dysonHair',dy2,1);
+  addFloor('barbecue',17,9,0,0,'#1f2024');addFloor('plancha',19,9,0,0,colorPick('plancha'));addFloor('climatiseur',17,11,0,0,colorPick('climatiseur'));addFloor('ventilateur',19,11,0,0,colorPick('ventilateur'));
+  addFloor('scooter',15,9.5,.4,0,'#c62828');addFloor('scooterPro',15,11,-.4,0,'#3a5a8c');
+  addFloor('caisse',9,13.5,0,0);addFloor('pubInf',3,12,0,0);addFloor('pubClub',-2,12,0,0);addFloor('totemPub',-6,12.5,0,0);
+  addFloor('cloison3',-13,5,0,0);addFloor('cloison2',-13,9,0,0);
+  deselect();}
 function loadSaved(){try{const s=localStorage.getItem('boulanger_pro_v3');if(s){loadLayout(JSON.parse(s));return true;}}catch(e){}return false;}
 
 /* EXEMPLE */
