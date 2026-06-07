@@ -398,6 +398,12 @@ let camLerp=1,cF=null,cT=null;function focusOn(o){const size=Math.max(o.foot.w,o
 const fp=new THREE.Plane(new THREE.Vector3(0,1,0),0),ray=new THREE.Raycaster(),tmp=new THREE.Vector3();
 function floorPoint(nx,ny){ray.setFromCamera({x:nx,y:ny},camera);return ray.ray.intersectPlane(fp,tmp)?tmp.clone():null;}
 function snap(x,z){return snapOn?{x:Math.round(x*2)/2,z:Math.round(z*2)/2}:{x,z};}
+function footHalf(foot,ry){const c=Math.abs(Math.cos(ry)),s=Math.abs(Math.sin(ry));return {hw:(foot.w*c+foot.d*s)/2,hd:(foot.w*s+foot.d*c)/2};}
+function snapDrag(o,x,z){if(!snapOn)return {x,z};const r=footHalf(o.foot,o.ry);let best=null,bd=.6;
+  for(const o2 of objects){if(o2===o||o2.parent)continue;const r2=footHalf(o2.foot,o2.ry);
+    const cands=[{x:o2.x+r.hw+r2.hw,z:o2.z},{x:o2.x-(r.hw+r2.hw),z:o2.z},{x:o2.x,z:o2.z+r.hd+r2.hd},{x:o2.x,z:o2.z-(r.hd+r2.hd)}];
+    for(const c of cands){const dd=Math.hypot(x-c.x,z-c.z);if(dd<bd){bd=dd;best=c;}}}
+  return best||{x:Math.round(x*2)/2,z:Math.round(z*2)/2};}
 function pickAt(nx,ny){ray.setFromCamera({x:nx,y:ny},camera);const h=ray.intersectObjects(pick,false);return h.length?h[0].object.userData.obj:null;}
 function panBy(dx,dy){const f=new THREE.Vector3();camera.getWorldDirection(f);f.y=0;f.normalize();const r=new THREE.Vector3().crossVectors(f,new THREE.Vector3(0,1,0)).normalize();const k=orbit.dist*.0016;orbit.target.addScaledVector(r,-dx*k);orbit.target.addScaledVector(f,dy*k);}
 
@@ -411,7 +417,7 @@ canvas.addEventListener('pointermove',e=>{if(mode!=='edit'||menuOpen)return;cons
   if(gesture==='pinch'&&pts.size===2){const a=[...pts.values()];const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),mx=(a[0].x+a[1].x)/2,my=(a[0].y+a[1].y)/2;orbit.dist=clamp(orbit.dist*pinch.d/d,4,52);panBy(mx-pinch.mx,my-pinch.my);pinch={d,mx,my};applyOrbit();}
   else if(gesture==='orbit'&&pts.size===1){orbit.az-=dx*.005;orbit.polar=clamp(orbit.polar-dy*.005,.12,1.5);applyOrbit();refreshSlots();}
   else if(gesture==='pan'&&pts.size===1){panBy(dx,dy);applyOrbit();refreshSlots();}
-  else if(gesture==='move'&&dragObj){const p=floorPoint(n.x,n.y);if(p){const s=snap(p.x,p.z);dragObj.x=s.x;dragObj.z=s.z;dragObj.node.position.x=s.x;dragObj.node.position.z=s.z;box.update();refreshSlots();}}});
+  else if(gesture==='move'&&dragObj){const p=floorPoint(n.x,n.y);if(p){const s=snapDrag(dragObj,p.x,p.z);dragObj.x=s.x;dragObj.z=s.z;dragObj.node.position.x=s.x;dragObj.node.position.z=s.z;box.update();refreshSlots();}}});
 canvas.addEventListener('pointerup',e=>{if(mode!=='edit'||menuOpen)return;pts.delete(e.pointerId);const n=ndc(e);const tap=down&&down.moved<8&&performance.now()-down.t<500;
   if(pts.size===0){if(tap){if(armed){const slc=(T[armed].kind==='shelf')?slotAt(n.x,n.y):null;if(slc){select(addToSlot(armed,slc.disp,slc.i,armedColor));}else{const p=floorPoint(n.x,n.y);if(p){const s=snap(p.x,p.z);select(addFloor(armed,s.x,s.z,0,0,armedColor));}}}else{const slc=selected&&selected.slots?slotAt(n.x,n.y):null;if(slc){openSlotMenu(slc.disp,slc.i);}else{const hit=pickAt(n.x,n.y);if(hit)select(hit);else deselect();}}}if(gesture==='move')save();gesture=null;dragObj=null;down=null;}else if(pts.size===1)gesture='orbit';});
 canvas.addEventListener('wheel',e=>{if(mode!=='edit')return;e.preventDefault();orbit.dist=clamp(orbit.dist*(1+Math.sign(e.deltaY)*.1),4,52);applyOrbit();refreshSlots();},{passive:false});
