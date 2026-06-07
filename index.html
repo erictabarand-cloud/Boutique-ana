@@ -139,15 +139,14 @@ const sl=(x,y,z,acc,ry=0)=>({x,y,z,ry,acc});
 const CONS=['son','info','phone','small','dyson'];
 
 /* ===== PRÉSENTOIRS ===== */
-function gondolaLow(){const g=new THREE.Group();g.add(M(B(1.0,.34,2.6),MAT.plinth,0,.17,0));g.add(M(B(1.06,.05,2.66),MAT.whiteSoft,0,.36,0));g.add(M(B(1.0,.04,2.6),MAT.red,0,.44,-.48));return {g,foot:{w:1.06,d:2.66},h:.4,slots:[-.9,-.3,.3,.9].map(z=>sl(0,.385,z,CONS))};}
+function gondolaLow(){const w=1.4,d=.6,g=new THREE.Group();g.add(M(B(w,.4,d),MAT.plinth,0,.2,0));g.add(M(B(w,.04,d),MAT.whiteSoft,0,.42,0));g.add(M(B(w,.4,.03),MAT.whiteSoft,0,.64,-d/2+.015));g.add(M(B(w,.16,.03),MAT.red,0,.86,-d/2+.02));const nx=4,xs=[];for(let i=0;i<nx;i++)xs.push(-w/2+w*(i+.5)/nx);return {g,foot:{w,d},h:.95,slots:xs.map(x=>sl(x,.44,d/2-.18,CONS))};}
 function endCapLow(){const g=new THREE.Group();g.add(M(B(1.3,.5,.7),MAT.plinth,0,.25,0));g.add(M(B(1.36,.05,.76),MAT.whiteSoft,0,.55,0));g.add(M(B(1.36,.5,.05),MAT.red,0,.8,-.36));return {g,foot:{w:1.36,d:.76},h:.58,slots:[-.42,0,.42].map(x=>sl(x,.575,.05,CONS))};}
 function shelfUnit(width,depth,shelves,topRed,acc){const g=new THREE.Group();const n=Math.max(1,shelves|0);
   const topShelf=.55+(n-1)*.5,structTop=topShelf+.35,structB=.5,sH=structTop-structB,sC=(structTop+structB)/2;
   g.add(M(B(width,.5,depth),MAT.plinth,0,.25,0));
   g.add(M(B(width,sH,.03),MAT.whiteSoft,0,sC,-depth/2+.015));
-  for(const sx of[-width/2+.02,width/2-.02])g.add(M(B(.04,sH,depth),MAT.whiteSoft,sx,sC,0));
   const nx=width>1.1?4:3,xs=[];for(let i=0;i<nx;i++)xs.push(-width/2+width*(i+.5)/nx);
-  const slots=[];for(let i=0;i<n;i++){const y=.55+i*.5;g.add(M(B(width-.08,.04,depth-.04),MAT.whiteSoft,0,y,0));for(const x of xs)slots.push(sl(x,y+.02,depth/2-.18,acc));}
+  const slots=[];for(let i=0;i<n;i++){const y=.55+i*.5;g.add(M(B(width,.04,depth),MAT.whiteSoft,0,y,0));for(const x of xs)slots.push(sl(x,y+.02,depth/2-.18,acc));}
   if(topRed)g.add(M(B(width,.3,depth),MAT.red,0,structTop+.15,0));
   return {g,foot:{w:width,d:depth},h:structTop+(topRed?.3:0),slots,shelves:n};}
 function gondolaHigh(c,sh){return shelfUnit(1.4,.6,sh||3,false,CONS);}
