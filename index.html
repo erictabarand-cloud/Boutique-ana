@@ -154,7 +154,11 @@ function endCapHigh(c,sh){return shelfUnit(1.3,.55,sh||3,true,CONS);}
 function tableExpo(){const g=new THREE.Group();g.add(M(B(2.4,.05,1.1),MAT.wood,0,.78,0));for(const sx of[-1.1,1.1])for(const sz of[-.46,.46])g.add(M(B(.06,.78,.06),MAT.inoxDark,sx,.39,sz));const slots=[];for(const x of[-.8,0,.8])for(const z of[-.26,.26])slots.push(sl(x,.805,z,CONS));return {g,foot:{w:2.4,d:1.1},h:.805,slots};}
 function appleTotem(){const g=new THREE.Group();g.add(M(new THREE.CylinderGeometry(.7,.85,.9,4),baseStd('#f6f6f8',.05,.35),0,.45,0).rotateY(Math.PI/4));g.add(M(B(1.5,.06,.9),baseStd('#fafafc',.05,.3),0,.92,0));return {g,foot:{w:1.5,d:.9},h:.95,slots:[-.5,0,.5].map(x=>sl(x,.95,0,['info','phone']))};}
 function podium(){const g=new THREE.Group();g.add(M(B(.9,.85,.9),MAT.plinth,0,.425,0));g.add(M(B(1.0,.05,1.0),MAT.whiteSoft,0,.875,0));return {g,foot:{w:1.0,d:1.0},h:.9,slots:[sl(0,.9,0,CONS)]};}
-function tvUnit(){const g=new THREE.Group();g.add(M(B(2.4,.45,.5),MAT.pBlack,0,.225,0));g.add(M(B(2.3,.04,.46),MAT.pDark,0,.32,0));return {g,foot:{w:2.4,d:.5},h:.47,slots:[sl(0,.34,-.05,['tv']),sl(0,.34,.18,['son'])]};}
+function tvUnit(){const g=new THREE.Group();g.add(M(B(2.4,.45,.5),MAT.pBlack,0,.225,0));g.add(M(B(2.3,.04,.46),MAT.pDark,0,.34,0));return {g,foot:{w:2.4,d:.5},h:.47,slots:[sl(0,.37,0,['tv']),sl(0,.37,.18,['son'])]};}
+function tvWall(){const g=new THREE.Group();g.add(M(B(2.6,2.8,.06),baseStd('#2a2c30',.3,.6),0,1.5,-.1));g.add(M(B(2.6,.1,.22),MAT.pBlack,0,.1,0));return {g,foot:{w:2.6,d:.3},h:2.9,slots:[{x:0,y:.8,z:0,ry:0,acc:['tv'],wall:1}]};}
+function brandRack(label,bg,fg){return(c,s)=>{const w=1.6,d=.6,u=shelfUnit(w,d,s||3,false,['son']);u.g.add(M(B(w,.32,d),baseStd(bg,.15,.5),0,u.h+.16,0));const sg=new THREE.Mesh(B(w-.08,.26,.02),signMat(label,bg,fg));sg.position.set(0,u.h+.16,d/2-.01);u.g.add(sg);u.h+=.32;return u;};}
+function canape(){return c=>{const g=new THREE.Group();const le=colMat(c,.15,.4),w=2.0,d=.9;g.add(M(B(w,.18,d),le,0,.25,0));for(let i=-1;i<=1;i++)g.add(M(B(w/3-.06,.16,d-.24),le,i*w/3,.44,.04));g.add(M(B(w,.5,.2),le,0,.55,-d/2+.1));for(let i=-1;i<=1;i++)g.add(M(B(w/3-.08,.4,.16),le,i*w/3,.6,-d/2+.13));for(const sx of[-w/2+.1,w/2-.1])g.add(M(B(.2,.45,d),le,sx,.42,0));for(const sx of[-w/2+.15,w/2-.15])for(const sz of[-d/2+.15,d/2-.15])g.add(M(CY(.03,.03,.16,8),MAT.pDark,sx,.08,sz));return {g,foot:{w:w+.1,d:d+.1},h:.8};};}
+function tapis(){return c=>{const g=new THREE.Group();g.add(M(B(3.2,.02,2.2),MAT.pDark,0,.01,0));g.add(M(B(3,.03,2),colMat(c,0,.95),0,.025,0));return {g,foot:{w:3.2,d:2.2},h:.05};};}
 function dysonStand(){const g=new THREE.Group();g.add(M(B(1.0,.5,.6),baseStd('#5b5e63',.7,.4),0,.25,0));g.add(M(B(1.04,.04,.64),baseStd('#7a4d2a',.6,.4),0,.52,0));g.add(M(B(1.0,1.5,.04),baseStd('#3a3c40',.4,.6),0,1.3,-.3));const lo=new THREE.Mesh(B(.5,.18,.04),signMat('dyson','#5b5e63','#fff'));lo.position.set(0,1.3,-.27);g.add(lo);return {g,foot:{w:1.04,d:.64},h:.54,slots:[-.32,.32].map(x=>sl(x,.54,.1,['dyson']))};}
 function gondolaAcc(){const g=new THREE.Group();g.add(M(B(1.2,.5,.5),MAT.plinth,0,.25,0));g.add(M(B(1.2,1.7,.05),MAT.whiteSoft,0,1.35,-.22));const slots=[];const rows=[.85,1.2,1.55,1.9],xs=[-.42,-.14,.14,.42];for(const y of rows)for(const x of xs){g.add(M(CY(.011,.011,.16,8),MAT.inoxDark,x,y,-.14).rotateX(Math.PI/2));slots.push(sl(x,y,-.04,['acc']));}return {g,foot:{w:1.2,d:.5},h:2.1,slots};}
 function ovenWall(cols,rows){return()=>{const g=new THREE.Group();const nw=.7,nh=.66,d=.62,Wd=cols*nw,base=.06;g.add(M(B(Wd,base,d),MAT.plinth,0,base/2,0));g.add(M(B(Wd,rows*nh,.05),MAT.whiteSoft,0,base+rows*nh/2,-d/2));for(let c=0;c<=cols;c++)g.add(M(B(.05,rows*nh,d),MAT.plinth,-Wd/2+c*nw,base+rows*nh/2,0));for(let r=0;r<=rows;r++)g.add(M(B(Wd,.05,d),MAT.plinth,0,base+r*nh,0));const slots=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)slots.push(sl(-Wd/2+nw*(c+.5),base+r*nh+.03,0,['oven']));return {g,foot:{w:Wd,d:d+.55},h:base+rows*nh,slots};};}
@@ -166,7 +170,7 @@ function totemPub(){const g=new THREE.Group();g.add(M(B(1.0,2.6,.18),MAT.pBlack,
 
 /* ===== PRODUITS ===== */
 const TVW={32:.6,43:.8,50:1.0,55:1.2,65:1.8,77:2.4};
-function tv(diag){return()=>{const g=new THREE.Group();const w=TVW[diag]||diag*.0125,h=w*.57;g.add(M(B(w,h,.04),MAT.pBlack,0,h/2+.07,0));const sc=new THREE.Mesh(B(w-.04,h-.04,.005),adMat);sc.position.set(0,h/2+.07,.025);g.add(sc);g.add(M(B(Math.min(.55,w*.45),.05,.24),MAT.pDark,0,.02,0));g.add(M(B(Math.min(.5,w*.4),.04,.05),MAT.pDark,0,.07,0));return {g,foot:{w:Math.max(w,.3),d:.35},h:h+.07};};}
+function tv(diag){return()=>{const g=new THREE.Group();const w=TVW[diag]||diag*.0125,h=w*.57;g.add(M(B(w,h,.04),MAT.pBlack,0,h/2+.07,0));const sc=new THREE.Mesh(B(w-.04,h-.04,.005),adMat);sc.position.set(0,h/2+.07,.025);g.add(sc);const f1=M(B(Math.min(.55,w*.45),.05,.24),MAT.pDark,0,.02,0);f1.userData.stand=1;g.add(f1);const f2=M(B(Math.min(.5,w*.4),.04,.05),MAT.pDark,0,.07,0);f2.userData.stand=1;g.add(f2);return {g,foot:{w:Math.max(w,.3),d:.35},h:h+.07};};}
 function soundbar(){return c=>{const g=new THREE.Group();g.add(M(B(1.0,.08,.1),colMat(c,.3,.5),0,.04,0));g.add(M(B(.96,.05,.005),MAT.fabric,0,.04,.052));return {g,foot:{w:1,d:.1},h:.08};};}
 function speakerT(){return c=>{const g=new THREE.Group();const h=.95;g.add(M(B(.24,h,.28),colMat(c,.2,.5),0,h/2,0));g.add(M(B(.2,h-.04,.01),MAT.fabric,0,h/2,.14));for(const cy of[h*.7,h*.35])g.add(M(CY(.07,.07,.02,16),MAT.pDark,0,cy,.145).rotateX(Math.PI/2));return {g,foot:{w:.24,d:.28},h};};}
 function speakerC(){return c=>{const g=new THREE.Group();const h=.34;g.add(M(B(.22,h,.26),colMat(c,.2,.5),0,h/2,0));g.add(M(CY(.06,.06,.02,16),MAT.pDark,0,h*.5,.13).rotateX(Math.PI/2));return {g,foot:{w:.22,d:.26},h};};}
@@ -260,7 +264,7 @@ function scooter(){return c=>{const g=new THREE.Group();const body=colMat(c,.45,
   g.add(M(CY(.008,.008,.17,8),MAT.pDark,.07,.07,.18).rotateZ(.5));return {g,foot:{w:.4,d:.85},h:1.06};};}
 
 /* ===== CATALOGUE (≈10 / gamme) ===== */
-const C={app:[['Inox','#c4c9cf'],['Blanc','#f2f3f4'],['Noir','#1f2024'],['Gris','#8d9298']],tech:[['Argent','#cfd2d6'],['Sidéral','#3a3c40'],['Or','#e6cfa6'],['Bleu','#3a5a8c']],small:[['Noir','#1f2024'],['Blanc','#f2f3f4'],['Rouge','#c62828'],['Crème','#e8e1d2'],['Bleu','#3a5a8c'],['Vert','#4f7d63']],dyson:[['Fer/Nickel','#5b5e63'],['Bleu/Cuivre','#2f4a6b'],['Violet','#5a4a8c']],none:null};
+const C={app:[['Inox','#c4c9cf'],['Blanc','#f2f3f4'],['Noir','#1f2024'],['Gris','#8d9298']],tech:[['Argent','#cfd2d6'],['Sidéral','#3a3c40'],['Or','#e6cfa6'],['Bleu','#3a5a8c']],small:[['Noir','#1f2024'],['Blanc','#f2f3f4'],['Rouge','#c62828'],['Crème','#e8e1d2'],['Bleu','#3a5a8c'],['Vert','#4f7d63']],dyson:[['Fer/Nickel','#5b5e63'],['Bleu/Cuivre','#2f4a6b'],['Violet','#5a4a8c']],leather:[['Cognac','#8a5a2b'],['Noir','#1b1c1e'],['Blanc','#ece7df'],['Taupe','#7a6f63'],['Bordeaux','#5e2230']],rug:[['Rouge','#a8202a'],['Gris','#6b6e72'],['Bleu','#2f4a6b'],['Noir','#222426'],['Beige','#cbb491']],none:null};
 function P(l,cat,kind,opt){return Object.assign({l,cat,kind},opt);}
 const T={
   gondolaLow:P('Gondole basse','Présentoirs','disp',{solid:1,col:'none',build:()=>gondolaLow()}),
@@ -284,6 +288,7 @@ const T={
   totemPub:P('Totem pub','Présentoirs','floor',{solid:1,col:'none',build:()=>totemPub()}),
   pubInf:P('Pub infinity','Présentoirs','floor',{solid:1,col:'none',build:pubPanel('infinity',RED,'#fff')}),
   pubClub:P('Pub Club+','Présentoirs','floor',{solid:1,col:'none',build:pubPanel('CLUB+','#0c0d0f','#fff')}),
+  tvWall:P('Mur TV (au mur)','Présentoirs','disp',{solid:1,col:'none',build:()=>tvWall()}),
   tv32:P('TV 32"','Image & Son','shelf',{sc:'tv',col:'none',p:299,build:tv(32)}),
   tv43:P('TV 43"','Image & Son','shelf',{sc:'tv',col:'none',p:399,build:tv(43)}),
   tv50:P('TV 50"','Image & Son','shelf',{sc:'tv',col:'none',p:499,build:tv(50)}),
@@ -294,6 +299,8 @@ const T={
   speakerT:P('Enceinte colonne','Image & Son','shelf',{sc:'son',col:'small',p:399,build:speakerT()}),
   speakerC:P('Enceinte compacte','Image & Son','shelf',{sc:'son',col:'small',p:149,build:speakerC()}),
   headphones:P('Casque son','Image & Son','shelf',{sc:'son',col:'small',p:199,build:headphones()}),
+  rayonSonos:P('Rayon Sonos','Image & Son','disp',{solid:1,col:'none',shelves:3,build:brandRack('SONOS','#0b0c0e','#fff'),prefill:['soundbar','speakerC','speakerT','speakerC','soundbar','speakerC','speakerT','speakerC','soundbar','speakerC','speakerT','speakerC']}),
+  rayonBose:P('Rayon Bose','Image & Son','disp',{solid:1,col:'none',shelves:3,build:brandRack('BOSE','#0b0c0e','#fff'),prefill:['headphones','speakerC','soundbar','headphones','speakerC','soundbar','speakerT','headphones','speakerC','soundbar','speakerT','headphones']}),
   laptop:P('PC portable','Informatique & Tablettes','shelf',{sc:'info',col:'tech',p:999,build:laptop()}),
   laptopGamer:P('PC portable gamer','Informatique & Tablettes','shelf',{sc:'info',col:'tech',p:1799,build:laptop()}),
   ultrabook:P('Ultrabook','Informatique & Tablettes','shelf',{sc:'info',col:'tech',p:1299,build:laptop()}),
@@ -353,6 +360,8 @@ const T={
   ventilateur:P('Ventilateur','Extérieur & Mobilité','floor',{solid:1,col:'small',p:79,build:ventilateur()}),
   scooter:P('Trottinette','Extérieur & Mobilité','floor',{solid:1,col:'small',p:499,build:scooter()}),
   scooterPro:P('Trottinette Pro','Extérieur & Mobilité','floor',{solid:1,col:'small',p:799,build:scooter()}),
+  canape:P('Canapé cuir','Mobilier & Déco','floor',{solid:1,col:'leather',p:899,build:canape()}),
+  tapis:P('Tapis entrée','Mobilier & Déco','floor',{col:'rug',p:39,build:tapis()}),
   coque:P('Coque','Accessoires','shelf',{sc:'acc',col:'small',p:25,build:acc('coque')}),
   cable:P('Câble','Accessoires','shelf',{sc:'acc',col:'small',p:19,build:acc('cable')}),
   chargeur:P('Chargeur','Accessoires','shelf',{sc:'acc',col:'small',p:35,build:acc('chargeur')}),
@@ -364,7 +373,7 @@ const T={
   batterie:P('Batterie externe','Accessoires','shelf',{sc:'acc',col:'small',p:45,build:acc('batterie')}),
   casqueFil:P('Casque filaire','Accessoires','shelf',{sc:'acc',col:'small',p:49,build:headphones()})
 };
-const CATS=['Présentoirs','Image & Son','Informatique & Tablettes','Téléphonie','Petit électro & Café','Dyson','Encastrable','Gros électro & Froid','Extérieur & Mobilité','Accessoires'];
+const CATS=['Présentoirs','Image & Son','Informatique & Tablettes','Téléphonie','Petit électro & Café','Dyson','Encastrable','Gros électro & Froid','Extérieur & Mobilité','Mobilier & Déco','Accessoires'];
 const colorsOf=t=>(T[t].col&&C[T[t].col])?C[T[t].col]:null;
 
 /* ===== ÉTAT ===== */
@@ -376,8 +385,8 @@ const slotG=new THREE.Group();scene.add(slotG);
 const padGeo=new THREE.CircleGeometry(.18,20),padMat=new THREE.MeshBasicMaterial({color:0x33dd66,transparent:true,opacity:.6,side:THREE.DoubleSide,depthWrite:false});
 const $=id=>document.getElementById(id);
 function build(type,color,shelves){const def=T[type];return def.build(color||(colorsOf(type)?colorsOf(type)[0][1]:null),shelves||def.shelves);}
-function addFloor(type,x,z,ry=0,h=0,color){const r=build(type,color);const o={type,kind:T[type].kind,node:r.g,foot:r.foot,anims:r.anims||[],slots:r.slots||null,shelves:r.shelves||null,occ:{},x,z,ry,h,color:color||(colorsOf(type)?colorsOf(type)[0][1]:null),open:false,t:0,parent:null,slotIndex:-1,tag:null};r.g.position.set(x,h,z);r.g.rotation.y=ry;scene.add(r.g);r.g.traverse(m=>{if(m.isMesh)m.userData.obj=o;});objects.push(o);rebuildPick();save();return o;}
-function addToSlot(type,disp,i,color){const slot=disp.slots[i];const r=build(type,color);const o={type,kind:'shelf',node:r.g,foot:r.foot,anims:r.anims||[],x:0,z:0,ry:slot.ry,h:0,color:color||(colorsOf(type)?colorsOf(type)[0][1]:null),open:false,t:0,parent:disp,slotIndex:i,tag:null};disp.node.add(r.g);r.g.position.set(slot.x,slot.y,slot.z);r.g.rotation.y=slot.ry;r.g.traverse(m=>{if(m.isMesh)m.userData.obj=o;});
+function addFloor(type,x,z,ry=0,h=0,color,autofill){const r=build(type,color);const o={type,kind:T[type].kind,node:r.g,foot:r.foot,anims:r.anims||[],slots:r.slots||null,shelves:r.shelves||null,occ:{},x,z,ry,h,color:color||(colorsOf(type)?colorsOf(type)[0][1]:null),open:false,t:0,parent:null,slotIndex:-1,tag:null};r.g.position.set(x,h,z);r.g.rotation.y=ry;scene.add(r.g);r.g.traverse(m=>{if(m.isMesh)m.userData.obj=o;});objects.push(o);rebuildPick();if(autofill&&T[type].prefill&&o.slots)fillDisp(o,T[type].prefill);save();return o;}
+function addToSlot(type,disp,i,color){const slot=disp.slots[i];const r=build(type,color);const o={type,kind:'shelf',node:r.g,foot:r.foot,anims:r.anims||[],x:0,z:0,ry:slot.ry,h:0,color:color||(colorsOf(type)?colorsOf(type)[0][1]:null),open:false,t:0,parent:disp,slotIndex:i,tag:null};disp.node.add(r.g);r.g.position.set(slot.x,slot.y,slot.z);r.g.rotation.y=slot.ry;r.g.traverse(m=>{if(m.isMesh)m.userData.obj=o;});if(slot.wall)r.g.traverse(m=>{if(m.userData.stand)m.visible=false;});
   if(T[type].p){const tg=new THREE.Mesh(B(.24,.13,.01),tagMat(T[type].p));tg.position.set(slot.x+.15,slot.y+.11,slot.z+.16);disp.node.add(tg);o.tag=tg;priceTags.push(tg);tg.visible=showTags;}
   disp.occ[i]=o;objects.push(o);rebuildPick();refreshSlots();save();return o;}
 function rebuildPick(){pick.length=0;for(const o of objects)o.node.traverse(m=>{if(m.isMesh)pick.push(m);});}
@@ -419,7 +428,7 @@ canvas.addEventListener('pointermove',e=>{if(mode!=='edit'||menuOpen)return;cons
   else if(gesture==='pan'&&pts.size===1){panBy(dx,dy);applyOrbit();refreshSlots();}
   else if(gesture==='move'&&dragObj){const p=floorPoint(n.x,n.y);if(p){const s=snapDrag(dragObj,p.x,p.z);dragObj.x=s.x;dragObj.z=s.z;dragObj.node.position.x=s.x;dragObj.node.position.z=s.z;box.update();refreshSlots();}}});
 canvas.addEventListener('pointerup',e=>{if(mode!=='edit'||menuOpen)return;pts.delete(e.pointerId);const n=ndc(e);const tap=down&&down.moved<8&&performance.now()-down.t<500;
-  if(pts.size===0){if(tap){if(armed){const slc=(T[armed].kind==='shelf')?slotAt(n.x,n.y):null;if(slc){select(addToSlot(armed,slc.disp,slc.i,armedColor));}else{const p=floorPoint(n.x,n.y);if(p){const s=snap(p.x,p.z);select(addFloor(armed,s.x,s.z,0,0,armedColor));}}}else{const slc=selected&&selected.slots?slotAt(n.x,n.y):null;if(slc){openSlotMenu(slc.disp,slc.i);}else{const hit=pickAt(n.x,n.y);if(hit)select(hit);else deselect();}}}if(gesture==='move')save();gesture=null;dragObj=null;down=null;}else if(pts.size===1)gesture='orbit';});
+  if(pts.size===0){if(tap){if(armed){const slc=(T[armed].kind==='shelf')?slotAt(n.x,n.y):null;if(slc){select(addToSlot(armed,slc.disp,slc.i,armedColor));}else{const p=floorPoint(n.x,n.y);if(p){const s=snap(p.x,p.z);select(addFloor(armed,s.x,s.z,0,0,armedColor,true));}}}else{const slc=selected&&selected.slots?slotAt(n.x,n.y):null;if(slc){openSlotMenu(slc.disp,slc.i);}else{const hit=pickAt(n.x,n.y);if(hit)select(hit);else deselect();}}}if(gesture==='move')save();gesture=null;dragObj=null;down=null;}else if(pts.size===1)gesture='orbit';});
 canvas.addEventListener('wheel',e=>{if(mode!=='edit')return;e.preventDefault();orbit.dist=clamp(orbit.dist*(1+Math.sign(e.deltaY)*.1),4,52);applyOrbit();refreshSlots();},{passive:false});
 
 /* TOOLBAR */
